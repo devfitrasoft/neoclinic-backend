@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35806.99
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Communication", "Communication", "{BDE3F688-BE84-4122-B07B-BFC8525B2117}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Communication", "Shared\Shared.Communication\Shared.Communication.csproj", "{B44390CA-EA72-4F30-8B5A-476ADFC06D85}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mailing", "Mailing", "{B6F0772B-348C-41A7-8B6C-AC6A47ACC9DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Mailing", "Shared\Shared.Mailing\Shared.Mailing.csproj", "{3FB5E0DE-1687-4E51-945D-1A66AB1ED361}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B44390CA-EA72-4F30-8B5A-476ADFC06D85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B44390CA-EA72-4F30-8B5A-476ADFC06D85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B44390CA-EA72-4F30-8B5A-476ADFC06D85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B44390CA-EA72-4F30-8B5A-476ADFC06D85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FB5E0DE-1687-4E51-945D-1A66AB1ED361}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FB5E0DE-1687-4E51-945D-1A66AB1ED361}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FB5E0DE-1687-4E51-945D-1A66AB1ED361}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FB5E0DE-1687-4E51-945D-1A66AB1ED361}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BDE3F688-BE84-4122-B07B-BFC8525B2117} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{B44390CA-EA72-4F30-8B5A-476ADFC06D85} = {BDE3F688-BE84-4122-B07B-BFC8525B2117}
+		{B6F0772B-348C-41A7-8B6C-AC6A47ACC9DB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3FB5E0DE-1687-4E51-945D-1A66AB1ED361} = {B6F0772B-348C-41A7-8B6C-AC6A47ACC9DB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B75F11ED-BF2C-46F7-AA90-69ACAAB07106}
+	EndGlobalSection
+EndGlobal
