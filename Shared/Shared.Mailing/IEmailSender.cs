@@ -4,7 +4,7 @@ using System.Threading;
 namespace Shared.Mailing
 {
     /// <summary>Abstraction over any e‑mail transport.</summary>
-    interface IEmailSender
+    public interface IEmailSender
     {
         Task SendAsync(
         string to,
