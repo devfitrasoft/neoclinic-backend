@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "c1f9729f-b1d5-471c-b52f-d342c278b550",
+		"name": "neoclinic-backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14053618",
+		"_collection_link": "https://speeding-space-209190.postman.co/workspace/Snape-Ackcio~3880a6fd-9f50-4bdd-93aa-5e074a570209/collection/14053618-c1f9729f-b1d5-471c-b52f-d342c278b550?action=share&source=collection_link&creator=14053618"
+	},
+	"item": [
+		{
+			"name": "neo.admin",
+			"item": [
+				{
+					"name": "Check Faskes by No. Faskes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_neo.admin}}/faskes/1111U027",
+							"host": [
+								"{{base_url_neo.admin}}"
+							],
+							"path": [
+								"faskes",
+								"1111U027"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register New Faskes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"noFaskes\": \"1111U027\",\r\n  \"name\": \"Klinik Medika Sehat\",\r\n  \"isCorporate\": true,\r\n  \"corporateId\": null,  // will be null if isCorporate = false or corporateName is entirely new\r\n  \"corporateName\": \"Medika Group\",  // will be null if isCorporate = false\r\n  \"email\": \"mgajinugrh.work@gmail.com\",\r\n  \"phone\": \"+6281911744529\",\r\n  \"address\": \"Jl. Sudirman No. 10, Jakarta\",\r\n  \"captchaToken\": \"test\"   // token from front‑end reCAPTCHA\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url_neo.admin}}/register/faskes",
+							"host": [
+								"{{base_url_neo.admin}}"
+							],
+							"path": [
+								"register",
+								"faskes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Corporate (for dropdown)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_neo.admin}}/corporates?q=medika",
+							"host": [
+								"{{base_url_neo.admin}}"
+							],
+							"path": [
+								"corporates"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "medika"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Manage registration process for new faskes"
+		}
+	]
+}
