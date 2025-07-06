@@ -10,7 +10,7 @@ Dependencies
 
 - PostgreSQL
 - 7Zip (for archiving past logs)
-- Configure appsettings.json
+- Configure neo.admin/appsettings.json
 ```
 "ConnectionStrings": {
   "EnterpriseDB": "Host=<db host>;Database=db_neoclinic;Username=<db username>;Password=<db password>"
