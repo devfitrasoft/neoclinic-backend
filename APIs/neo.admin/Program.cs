@@ -6,6 +6,7 @@ using Shared.Mailing;
 using Shared.Communication.DependencyInjection;
 using Shared.Logging;
 using Shared.EFCore;
+using neo.admin;
 
 
 var b = WebApplication.CreateBuilder(args);
@@ -41,7 +42,7 @@ b.Services.AddScoped<RegistrationMailService>();
 b.Services.AddCors(opts =>
 {
     opts.AddDefaultPolicy(policy =>
-        policy.WithOrigins(b.Configuration.GetValue<string>("App:FrontendUrl"))
+        policy.WithOrigins(b.Configuration.GetValue<string>("App:FrontendUrl") ?? Constants.FRONT_END_URL)
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
