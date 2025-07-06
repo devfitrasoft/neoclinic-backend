@@ -32,12 +32,21 @@ public sealed class RegistrationService
                 : await CreateCorporateIfMissing(req.CorporateName!, ct);
         }
 
+        bool preExisted = false;
+        bool success = false;
         // 2. Lookup faskes by NoFaskes (not Name!)
         var faskes = await _db.Faskeses
                         .FirstOrDefaultAsync(f => f.NoFaskes == req.NoFaskes, ct);
 
         if (faskes == null)
+        {
             faskes = await CreateNewFaskes(req, corp, ct);
+        }
+        else
+        {
+            success = preExisted = true;  // mark this faskes as pre-existed
+            return new RegisterFaskesResponse(success, preExisted);
+        }
 
         // 3. Create SU login if it doesn't already exist
         string username = $"{faskes.NoFaskes}.SU";
@@ -78,9 +87,9 @@ public sealed class RegistrationService
         await _mail.SendConfirmPaymentReminder(req.Email, faskes.Name);
 
         // 5. Only return true when both were newly inserted (Id > 0)
-        bool success = faskes.Id > 0 && login.Id > 0;
+        success = faskes.Id > 0 && login.Id > 0;
 
-        return new RegisterFaskesResponse(success);
+        return new RegisterFaskesResponse(success, preExisted);
     }
 
     private async Task<Corporate> CreateCorporateIfMissing(string name, CancellationToken ct)
