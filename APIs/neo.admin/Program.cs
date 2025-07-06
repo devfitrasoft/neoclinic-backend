@@ -38,7 +38,17 @@ b.Services.AddScoped<FaskesQueryService>();
 b.Services.AddScoped<CorporateQueryService>();
 b.Services.AddScoped<RegistrationMailService>();
 
+b.Services.AddCors(opts =>
+{
+    opts.AddDefaultPolicy(policy =>
+        policy.WithOrigins(b.Configuration.GetValue<string>("App:FrontendUrl"))
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 var app = b.Build();
+
+app.UseCors();   // uses the default policy above
 
 /* 1. GET faskes by nomor */
 app.MapGet("/faskes/{noFaskes}",
