@@ -16,3 +16,4 @@ Dependencies
   "EnterpriseDB": "Host=<db host>;Database=db_neoclinic;Username=<db username>;Password=<db password>"
 },
 ```
+- Run the APIs as IIS Server in local environment
