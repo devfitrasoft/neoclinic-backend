@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "c1f9729f-b1d5-471c-b52f-d342c278b550",
+		"_postman_id": "8a965ea5-c169-44f0-92f4-0c36ee7aeb3a",
 		"name": "neoclinic-backend",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "14053618",
-		"_collection_link": "https://speeding-space-209190.postman.co/workspace/Snape-Ackcio~3880a6fd-9f50-4bdd-93aa-5e074a570209/collection/14053618-c1f9729f-b1d5-471c-b52f-d342c278b550?action=share&source=collection_link&creator=14053618"
+		"_collection_link": "https://speeding-space-209190.postman.co/workspace/NeoclinicV2~3fb383fb-bd03-463a-9324-1e1f5adde79f/collection/14053618-8a965ea5-c169-44f0-92f4-0c36ee7aeb3a?action=share&source=collection_link&creator=14053618"
 	},
 	"item": [
 		{
@@ -35,7 +35,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"noFaskes\": \"1111U027\",\r\n  \"name\": \"Klinik Medika Sehat\",\r\n  \"isCorporate\": true,\r\n  \"corporateId\": null,  // will be null if isCorporate = false or corporateName is entirely new\r\n  \"corporateName\": \"Medika Group\",  // will be null if isCorporate = false\r\n  \"email\": \"mgajinugrh.work@gmail.com\",\r\n  \"phone\": \"+6281911744529\",\r\n  \"address\": \"Jl. Sudirman No. 10, Jakarta\",\r\n  \"captchaToken\": \"test\"   // token from front‑end reCAPTCHA\r\n}",
+							"raw": "{\r\n  \"noFaskes\": \"1111U027\",\r\n  \"name\": \"Klinik Medika Sehat\",\r\n  \"isCorporate\": false,  // true/false\r\n  \"corporateId\": null,  // will be null if isCorporate = false or corporateName is entirely new\r\n  \"corporateName\": \"Medika Group\",  // will be null if isCorporate = false\r\n  \"email\": \"<registree email>\",\r\n  \"phone\": \"<registree phone number with whatsapp>\",\r\n  \"address\": \"Jl. Sudirman No. 10, Jakarta\",\r\n  \"captchaToken\": \"test\"   // token from front‑end reCAPTCHA\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
