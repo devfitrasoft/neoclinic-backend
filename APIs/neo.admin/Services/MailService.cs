@@ -4,13 +4,13 @@ using Shared.Mailing;
 
 namespace neo.admin.Services
 {
-    public class RegistrationMailService
+    public class MailService
     {
         private readonly IEmailSender _email;
         private readonly IConfiguration _cfg;
         private readonly RegistrationSettings _regSettings;
 
-        public RegistrationMailService( IConfiguration cfg,IEmailSender email, IOptions<RegistrationSettings> regSettings)
+        public MailService( IConfiguration cfg,IEmailSender email, IOptions<RegistrationSettings> regSettings)
         {
             _cfg = cfg;
             _email = email;
@@ -44,7 +44,7 @@ namespace neo.admin.Services
             """, new { fee, rekening, phone });
 
             return _email.SendAsync(toEmail,
-                $"Konfirmasi Pembayaran akun NeoClinic klinik {faskesName}",
+                $"Konfirmasi Pembayaran akun NeoClinic - {faskesName}",
                 html);
         }
     }

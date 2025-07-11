@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace neo.admin.Data.Entities
+namespace neo.admin.Data.Enterprise.Entities
 {
     /// <summary>Maps to <b>sys_faskes</b> in db_neoclinic.</summary>
     [Table("sys_faskes")]
