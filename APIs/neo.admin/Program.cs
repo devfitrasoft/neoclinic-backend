@@ -1,12 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using neo.admin.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using neo.admin;
+using neo.admin.Data.Enterprise;
+using neo.admin.Data.FaskesObj.Factories;
+using neo.admin.Data.Services;
+using neo.admin.Facades;
 using neo.admin.Models;
 using neo.admin.Services;
-using Shared.Mailing;
 using Shared.Communication.DependencyInjection;
-using Shared.Logging;
 using Shared.EFCore;
-using neo.admin;
+using Shared.Logging;
+using Shared.Mailing;
 
 
 var b = WebApplication.CreateBuilder(args);
@@ -30,14 +33,17 @@ b.Services.AddDbContext<EnterpriseDbContext>(o =>
 b.Services.AddEfAutoMigration<EnterpriseDbContext>("sys_corporate", "sys_faskes", "sys_login");
 /* --------------------------------------------- */
 
+b.Services.AddScoped<FaskesDbContextFactory>();
+
 b.Services.AddSharedRestClient();         // registers RestClient
 b.Services.AddMailing(b.Configuration);   // SMTP
-b.Services.AddScoped<IDBManagementClient, DBManagementClient>();
-b.Services.AddScoped<ICaptchaValidator, GoogleCaptchaValidator>();
-b.Services.AddScoped<RegistrationService>();
+b.Services.AddScoped<ICaptchaValidator, CaptchaValidatorService>();
 b.Services.AddScoped<FaskesQueryService>();
 b.Services.AddScoped<CorporateQueryService>();
-b.Services.AddScoped<RegistrationMailService>();
+b.Services.AddScoped<FaskesDbProvisionerService>();
+b.Services.AddScoped<MailService>();
+
+b.Services.AddScoped<IRegistrationFacade, RegistrationFacade>();
 
 b.Services.AddCors(opts =>
 {
@@ -52,11 +58,11 @@ var app = b.Build();
 app.UseCors();   // uses the default policy above
 
 /* 1. GET faskes by nomor */
-app.MapGet("/faskes/{noFaskes}",
+app.MapGet("/faskes/search/{noFaskes}",
     async (string noFaskes, FaskesQueryService q, CancellationToken ct) =>
-        await q.GetFaskesAsync(noFaskes, ct) is { } info
+        await q.GetAsync(noFaskes, ct) is { } info
             ? Results.Ok(info)
-            : Results.NotFound());
+            : Results.Ok());
 
 /* 2. GET corporations search */
 app.MapGet("/corporates",
@@ -64,13 +70,23 @@ app.MapGet("/corporates",
         Results.Ok(await cqs.SearchAsync(q, ct)));
 
 /* 3. POST register faskes */
-app.MapPost("/register/faskes",
+app.MapPost("/faskes/register",
     async (RegisterFaskesRequest req,
-           RegistrationService svc,
+           IRegistrationFacade facade,
            CancellationToken ct) =>
     {
-        var res = await svc.RegisterAsync(req, ct);
-        return Results.Created($"/register/faskes", res);
+        var res = await facade.RegisterAsync(req, ct);
+        return Results.Created($"/faskes/register", res);
+    });
+
+/* GET Back‑office activation */
+app.MapGet("/faskes/activate/{username}",
+    async (string username,
+           IRegistrationFacade facade,
+           CancellationToken ct) =>
+    {
+        await facade.ActivateFaskesAsync(username, ct);
+        return Results.Ok();
     });
 
 app.Run();

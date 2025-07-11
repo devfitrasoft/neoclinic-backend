@@ -1,10 +1,10 @@
 ﻿namespace neo.admin.Services
 {
-    public sealed class GoogleCaptchaValidator : ICaptchaValidator
+    public sealed class CaptchaValidatorService : ICaptchaValidator
     {
         private readonly IConfiguration _cfg;
         private readonly HttpClient _http;
-        public GoogleCaptchaValidator(IConfiguration cfg, IHttpClientFactory f) =>
+        public CaptchaValidatorService(IConfiguration cfg, IHttpClientFactory f) =>
             (_cfg, _http) = (cfg, f.CreateClient());
 
         public async Task<bool> VerifyAsync(string token, CancellationToken ct = default)
@@ -13,8 +13,9 @@
                 return true;
 
             var secret = _cfg["Captcha:Secret"];
+            var verifyUrl = _cfg["Captcha:VerifyUrl"];
             var resp = await _http.PostAsync(
-                $"https://www.google.com/recaptcha/api/siteverify?secret={secret}&response={token}",
+                $"{verifyUrl}?secret={secret}&response={token}",
                 null, ct);
 
             if (!resp.IsSuccessStatusCode) return false;

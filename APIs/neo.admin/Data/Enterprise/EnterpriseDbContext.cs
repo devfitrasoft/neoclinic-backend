@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using neo.admin.Data.Entities;
+using neo.admin.Data.Enterprise.Entities;
 
-namespace neo.admin.Data
+namespace neo.admin.Data.Enterprise
 {
     public class EnterpriseDbContext : DbContext
     {
@@ -10,6 +10,7 @@ namespace neo.admin.Data
         public DbSet<Corporate> Corporates => Set<Corporate>();
         public DbSet<Faskes> Faskeses => Set<Faskes>();   // EF pluralises badly, explicit set
         public DbSet<Login> Logins => Set<Login>();
+        public DbSet<ConnString> ConnStrings => Set<ConnString>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {

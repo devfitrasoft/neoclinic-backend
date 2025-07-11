@@ -113,7 +113,11 @@ namespace neo.admin.Migrations
                     db_name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     db_host = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     db_username = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
-                    db_password = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    db_password = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatorId = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdaterId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {

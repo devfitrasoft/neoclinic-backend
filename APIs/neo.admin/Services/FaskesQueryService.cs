@@ -1,32 +1,51 @@
 ﻿// Services/FaskesQueryService.cs
 using Microsoft.EntityFrameworkCore;
-using neo.admin.Data;
+using neo.admin.Data.Enterprise;
+using neo.admin.Data.Enterprise.Entities;
 using neo.admin.Models;
 
-public sealed class FaskesQueryService
+namespace neo.admin.Data.Services
 {
-    private readonly EnterpriseDbContext _db;
-    public FaskesQueryService(EnterpriseDbContext db) => _db = db;
+    public sealed class FaskesQueryService
+    {
+        private readonly EnterpriseDbContext _db;
+        public FaskesQueryService(EnterpriseDbContext db) => _db = db;
 
-    public Task<FaskesInfoResponse?> GetFaskesAsync(string noFaskes, CancellationToken ct) =>
-        _db.Faskeses
-           .Where(f => f.NoFaskes == noFaskes)
-           .Select(f => new FaskesInfoResponse(
-                f.Id, f.Name, f.Email, f.PhoneNumber, f.Address,
-                f.IsActive, f.CorporateId,
-                f.Corporate != null ? f.Corporate.Name : null))
-           .FirstOrDefaultAsync(ct);
-}
+        public Task<FaskesInfoResponse?> GetAsync(string noFaskes, CancellationToken ct) =>
+            _db.Faskeses
+               .Where(f => f.NoFaskes == noFaskes)
+               .Select(f => new FaskesInfoResponse(
+                    f.Id, f.Name, f.Email, f.PhoneNumber, f.Address,
+                    f.IsActive, f.CorporateId,
+                    f.Corporate != null ? f.Corporate.Name : null))
+               .FirstOrDefaultAsync(ct);
 
-// Services/CorporateQueryService.cs
-public sealed class CorporateQueryService
-{
-    private readonly EnterpriseDbContext _db;
-    public CorporateQueryService(EnterpriseDbContext db) => _db = db;
+        public async Task<Faskes> CreateNewFaskes(RegisterFaskesRequest req, Corporate? corp, CancellationToken ct)
+        {
+            // Double-check again to avoid race condition
+            var existing = await _db.Faskeses
+                                    .FirstOrDefaultAsync(f => f.NoFaskes == req.NoFaskes, ct);
+            if (existing != null)
+                return existing;
 
-    public Task<List<CorporateLookupItem>> SearchAsync(string term, CancellationToken ct) =>
-        _db.Corporates
-           .Where(c => !c.IsDeleted && EF.Functions.ILike(c.Name, $"%{term}%"))
-           .Select(c => new CorporateLookupItem(c.Id, c.Name))
-           .ToListAsync(ct);
+            var faskes = new Faskes
+            {
+                NoFaskes = req.NoFaskes,
+                Name = req.Name,
+                CorporateId = corp?.Id,
+                Corporate = corp,
+                Email = req.Email,
+                PhoneNumber = req.Phone,
+                Address = req.Address,
+                RegisteredDate = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                CreatorId = 0
+            };
+
+            _db.Faskeses.Add(faskes);
+            await _db.SaveChangesAsync(ct);
+
+            return faskes;
+        }
+    }
 }

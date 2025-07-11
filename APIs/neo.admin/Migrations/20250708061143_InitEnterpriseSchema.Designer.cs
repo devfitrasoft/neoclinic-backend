@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using neo.admin.Data;
+using neo.admin.Data.Enterprise;
 
 #nullable disable
 
 namespace neo.admin.Migrations
 {
     [DbContext(typeof(EnterpriseDbContext))]
-    [Migration("20250705113109_InitEnterpriseSchema")]
+    [Migration("20250708061143_InitEnterpriseSchema")]
     partial class InitEnterpriseSchema
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace neo.admin.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("neo.admin.Data.Entities.ConnString", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.ConnString", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,6 +33,12 @@ namespace neo.admin.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CreatorId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DbHost")
                         .IsRequired()
@@ -62,6 +68,12 @@ namespace neo.admin.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("login_id");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UpdaterId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LoginId");
@@ -69,7 +81,7 @@ namespace neo.admin.Migrations
                     b.ToTable("sys_connstring");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.Corporate", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Corporate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,7 +120,7 @@ namespace neo.admin.Migrations
                     b.ToTable("sys_corporate");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.Faskes", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Faskes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -191,7 +203,7 @@ namespace neo.admin.Migrations
                     b.ToTable("sys_faskes");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.Login", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Login", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -255,9 +267,9 @@ namespace neo.admin.Migrations
                     b.ToTable("sys_login");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.ConnString", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.ConnString", b =>
                 {
-                    b.HasOne("neo.admin.Data.Entities.Login", "Login")
+                    b.HasOne("neo.admin.Data.Enterprise.Entities.Login", "Login")
                         .WithMany()
                         .HasForeignKey("LoginId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -266,9 +278,9 @@ namespace neo.admin.Migrations
                     b.Navigation("Login");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.Faskes", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Faskes", b =>
                 {
-                    b.HasOne("neo.admin.Data.Entities.Corporate", "Corporate")
+                    b.HasOne("neo.admin.Data.Enterprise.Entities.Corporate", "Corporate")
                         .WithMany("Faskes")
                         .HasForeignKey("CorporateId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -276,14 +288,14 @@ namespace neo.admin.Migrations
                     b.Navigation("Corporate");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.Login", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Login", b =>
                 {
-                    b.HasOne("neo.admin.Data.Entities.Corporate", "Corporate")
+                    b.HasOne("neo.admin.Data.Enterprise.Entities.Corporate", "Corporate")
                         .WithMany()
                         .HasForeignKey("CorporateId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("neo.admin.Data.Entities.Faskes", "Faskes")
+                    b.HasOne("neo.admin.Data.Enterprise.Entities.Faskes", "Faskes")
                         .WithMany("Logins")
                         .HasForeignKey("FaskesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -294,12 +306,12 @@ namespace neo.admin.Migrations
                     b.Navigation("Faskes");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.Corporate", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Corporate", b =>
                 {
                     b.Navigation("Faskes");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Entities.Faskes", b =>
+            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Faskes", b =>
                 {
                     b.Navigation("Logins");
                 });
