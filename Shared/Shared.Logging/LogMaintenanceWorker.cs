@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,6 @@ namespace Shared.Logging;
 public sealed class LogMaintenanceWorker : BackgroundService
 {
     private readonly ILogger<LogMaintenanceWorker> _log;
-    private readonly IConfiguration _cfg;
     private readonly string _logDir;
     private readonly int _daysToKeep;
     private readonly string? _sevenZipExe;
@@ -20,7 +20,6 @@ public sealed class LogMaintenanceWorker : BackgroundService
     public LogMaintenanceWorker(IConfiguration cfg,
                                 ILogger<LogMaintenanceWorker> log)
     {
-        _cfg = cfg;
         _log = log;
         _logDir = Path.GetDirectoryName(cfg["Logging:FilePath"] ?? Path.Combine(LogConstants.Dir, LogConstants.Ext)) ?? LogConstants.Dir;
         _daysToKeep = cfg.GetValue<int>("Logging:RetentionDays", LogConstants.Default_Retention); // Keep 2 month's old files by default
@@ -53,7 +52,7 @@ public sealed class LogMaintenanceWorker : BackgroundService
             return;
         }
 
-        var yesterday = DateTime.UtcNow.AddDays(-1).ToString("yyyyMMdd");
+        var yesterday = DateTime.Now.AddDays(-1).ToString("yyyyMMdd");
         var txt = Path.Combine(_logDir, $"{yesterday}.txt");
         var seven = Path.Combine(_logDir, $"{yesterday}.7z");
 
@@ -87,14 +86,24 @@ public sealed class LogMaintenanceWorker : BackgroundService
 
     private void PurgeOldArchives()
     {
-        var cutoff = DateTime.UtcNow.AddDays(-_daysToKeep);
+        var cutoff = DateTime.Now.AddDays(-_daysToKeep);
 
         foreach (var file in Directory.EnumerateFiles(_logDir, "*.7z"))
         {
-            if (File.GetCreationTimeUtc(file) < cutoff)
+            var fileName = Path.GetFileNameWithoutExtension(file);
+
+            // Parse date from filename instead of relying on file system timestamps
+            if (DateTime.TryParseExact(fileName, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fileDate))
             {
-                File.Delete(file);
-                _log.LogInformation("Deleted old archive {File}", file);
+                if (fileDate < cutoff)
+                {
+                    File.Delete(file);
+                    _log.LogInformation("Deleted old archive {File}", file);
+                }
+            }
+            else
+            {
+                _log.LogWarning("Unable to parse date from filename {File}", file);
             }
         }
     }
