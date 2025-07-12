@@ -32,7 +32,7 @@ public sealed class LogMaintenanceWorker : BackgroundService
         {
             try
             {
-                CompressYesterday();
+                CompressOldTxtLogs();
                 PurgeOldArchives();
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ public sealed class LogMaintenanceWorker : BackgroundService
         }
     }
 
-    private void CompressYesterday()
+    private void CompressOldTxtLogs()
     {
         if (string.IsNullOrWhiteSpace(_sevenZipExe) || !File.Exists(_sevenZipExe))
         {
@@ -52,58 +52,73 @@ public sealed class LogMaintenanceWorker : BackgroundService
             return;
         }
 
-        var yesterday = DateTime.Now.AddDays(-1).ToString("yyyyMMdd");
-        var txt = Path.Combine(_logDir, $"{yesterday}.txt");
-        var seven = Path.Combine(_logDir, $"{yesterday}.7z");
+        var today = DateTime.Now.Date;
 
-        if (!File.Exists(txt) || File.Exists(seven)) return;
-
-        Directory.CreateDirectory(_logDir);
-
-        var psi = new ProcessStartInfo
+        foreach (var txtPath in Directory.EnumerateFiles(_logDir, "*.txt"))
         {
-            FileName = _sevenZipExe,
-            Arguments = $"a -bb0 -t7z \"{seven}\" \"{txt}\" -mx=9",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
-            UseShellExecute = false
-        };
+            var fileName = Path.GetFileNameWithoutExtension(txtPath);
 
-        using var proc = Process.Start(psi)!;
-        proc.WaitForExit();
+            if (!DateTime.TryParseExact(fileName, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fileDate))
+            {
+                _log.LogWarning("Invalid log filename: {File}. Deleting.", txtPath);
+                File.Delete(txtPath);
+                continue;
+            }
 
-        if (proc.ExitCode != 0)
-        {
-            _log.LogError("7‑Zip exited with code {Code}: {Err}",
-                          proc.ExitCode, proc.StandardError.ReadToEnd());
-            return;
+            // Skip today's log — it might still be written to
+            if (fileDate >= today)
+                continue;
+
+            var sevenZipPath = Path.Combine(_logDir, $"{fileName}.7z");
+            if (File.Exists(sevenZipPath))
+            {
+                _log.LogInformation("Archive already exists for {Date}, skipping compression.", fileName);
+                continue;
+            }
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = _sevenZipExe,
+                Arguments = $"a -bb0 -t7z \"{sevenZipPath}\" \"{txtPath}\" -mx=9",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+
+            using var proc = Process.Start(psi)!;
+            proc.WaitForExit();
+
+            if (proc.ExitCode != 0)
+            {
+                _log.LogError("7-Zip failed for {File}. Code: {Code}, Error: {Err}", txtPath, proc.ExitCode, proc.StandardError.ReadToEnd());
+                continue;
+            }
+
+            File.Delete(txtPath);
+            _log.LogInformation("Compressed and deleted log: {Txt} → {Seven}", txtPath, sevenZipPath);
         }
-
-        File.Delete(txt);
-        _log.LogInformation("Archived {Txt} → {Seven}", txt, seven);
     }
 
     private void PurgeOldArchives()
     {
-        var cutoff = DateTime.Now.AddDays(-_daysToKeep);
+        var cutoff = DateTime.Now.AddDays(-_daysToKeep).Date;
 
-        foreach (var file in Directory.EnumerateFiles(_logDir, "*.7z"))
+        foreach (var sevenZipPath in Directory.EnumerateFiles(_logDir, "*.7z"))
         {
-            var fileName = Path.GetFileNameWithoutExtension(file);
+            var fileName = Path.GetFileNameWithoutExtension(sevenZipPath);
 
-            // Parse date from filename instead of relying on file system timestamps
-            if (DateTime.TryParseExact(fileName, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fileDate))
+            if (!DateTime.TryParseExact(fileName, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fileDate))
             {
-                if (fileDate < cutoff)
-                {
-                    File.Delete(file);
-                    _log.LogInformation("Deleted old archive {File}", file);
-                }
+                _log.LogWarning("Delete unknown archive: {File}", sevenZipPath);
+                File.Delete(sevenZipPath);
+                continue;
             }
-            else
+
+            if (fileDate < cutoff)
             {
-                _log.LogWarning("Unable to parse date from filename {File}", file);
+                File.Delete(sevenZipPath);
+                _log.LogInformation("Deleted expired archive: {File}", sevenZipPath);
             }
         }
     }
