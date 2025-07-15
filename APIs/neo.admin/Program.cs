@@ -1,15 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using neo.admin;
 using neo.admin.Data.Enterprise;
 using neo.admin.Data.FaskesObj.Factories;
-using neo.admin.Data.Services;
 using neo.admin.Facades;
+using neo.admin.Migrations.Factories;
 using neo.admin.Models;
+using neo.admin.Queries;
 using neo.admin.Services;
+using Shared.Common;
 using Shared.Communication.DependencyInjection;
 using Shared.EFCore;
 using Shared.Logging;
 using Shared.Mailing;
+using System.ComponentModel.DataAnnotations;
 
 
 var b = WebApplication.CreateBuilder(args);
@@ -26,6 +28,7 @@ b.Host.UseSerilogLogging(b.Configuration);
 if (b.Configuration.GetValue("Logging:EnableFileSink", true))
     b.Services.AddHostedService<LogMaintenanceWorker>();  // register background compressor
 
+/*  Load DBContexts */
 b.Services.AddDbContext<EnterpriseDbContext>(o =>
     o.UseNpgsql(b.Configuration.GetConnectionString("EnterpriseDB")));
 
@@ -33,22 +36,30 @@ b.Services.AddDbContext<EnterpriseDbContext>(o =>
 b.Services.AddEfAutoMigration<EnterpriseDbContext>("sys_corporate", "sys_faskes", "sys_login");
 /* --------------------------------------------- */
 
+/*  Load Factories  */
 b.Services.AddScoped<FaskesDbContextFactory>();
+b.Services.AddScoped<DbProvisionerFactory>();
 
+/*  Load base libraries */
 b.Services.AddSharedRestClient();         // registers RestClient
 b.Services.AddMailing(b.Configuration);   // SMTP
-b.Services.AddScoped<ICaptchaValidator, CaptchaValidatorService>();
-b.Services.AddScoped<FaskesQueryService>();
-b.Services.AddScoped<CorporateQueryService>();
-b.Services.AddScoped<FaskesDbProvisionerService>();
+
+/*  Load services   */
+b.Services.AddScoped<ICaptchaValidatorService, CaptchaValidatorService>();
 b.Services.AddScoped<MailService>();
 
+/*  Load queries    */
+b.Services.AddScoped<FaskesQueries>();
+b.Services.AddScoped<CorporateQueries>();
+
+/*  Load facades    */
 b.Services.AddScoped<IRegistrationFacade, RegistrationFacade>();
 
+/*  Set Cors Policy for UI    */
 b.Services.AddCors(opts =>
 {
     opts.AddDefaultPolicy(policy =>
-        policy.WithOrigins(b.Configuration.GetValue<string>("App:FrontendUrl") ?? Constants.FRONT_END_URL)
+        policy.WithOrigins(b.Configuration.GetValue<string>("App:RegisterWebUrl") ?? Constants.REGISTER_FRONT_END_URL)
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -57,16 +68,18 @@ var app = b.Build();
 
 app.UseCors();   // uses the default policy above
 
+/*  Endpoints   */
+
 /* 1. GET faskes by nomor */
 app.MapGet("/faskes/search/{noFaskes}",
-    async (string noFaskes, FaskesQueryService q, CancellationToken ct) =>
+    async (string noFaskes, FaskesQueries q, CancellationToken ct) =>
         await q.GetAsync(noFaskes, ct) is { } info
             ? Results.Ok(info)
             : Results.Ok());
 
 /* 2. GET corporations search */
 app.MapGet("/corporates",
-    async (string q, CorporateQueryService cqs, CancellationToken ct) =>
+    async (string q, CorporateQueries cqs, CancellationToken ct) =>
         Results.Ok(await cqs.SearchAsync(q, ct)));
 
 /* 3. POST register faskes */
@@ -75,6 +88,14 @@ app.MapPost("/faskes/register",
            IRegistrationFacade facade,
            CancellationToken ct) =>
     {
+        var validationResults = new List<ValidationResult>();
+        var context = new ValidationContext(req);
+
+        if (!Validator.TryValidateObject(req, context, validationResults, validateAllProperties: true))
+        {
+            return Results.BadRequest(validationResults);
+        }
+
         var res = await facade.RegisterAsync(req, ct);
         return Results.Created($"/faskes/register", res);
     });

@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
 using neo.admin.Data.Enterprise.Entities;
-using neo.admin.Data.Services;
+using neo.admin.Migrations.Factories;
 using neo.admin.Models;
+using neo.admin.Queries;
 using neo.admin.Services;
 using Shared.Common;
 
@@ -18,21 +19,21 @@ namespace neo.admin.Facades
     {
         private readonly IConfiguration _cfg;
         private readonly EnterpriseDbContext _edb;
-        private readonly FaskesQueryService _faskes;
+        private readonly FaskesQueries _faskes;
         private readonly MailService _mail;
-        private readonly CorporateQueryService _corporate;
-        private readonly FaskesDbProvisionerService _prov;
+        private readonly CorporateQueries _corporate;
+        private readonly DbProvisionerFactory _prov;
 
-        private readonly ICaptchaValidator _captcha;
+        private readonly ICaptchaValidatorService _captcha;
 
         public RegistrationFacade(
             IConfiguration cfg,
             EnterpriseDbContext edb,
-            FaskesQueryService faskes,
-            FaskesDbProvisionerService prov,
-            CorporateQueryService corporate,
+            FaskesQueries faskes,
+            DbProvisionerFactory prov,
+            CorporateQueries corporate,
             MailService mail,
-            ICaptchaValidator captcha) { 
+            ICaptchaValidatorService captcha) { 
             _cfg = cfg;
             _edb = edb;
             _mail = mail;

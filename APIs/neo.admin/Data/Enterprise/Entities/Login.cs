@@ -7,30 +7,34 @@ namespace neo.admin.Data.Enterprise.Entities
     [Table("sys_login")]
     public class Login
     {
-        [Key] public long Id { get; set; }
+        [Key, Column("id")] public long Id { get; set; }
 
-        [Required, MaxLength(255)]
+        [Required, MaxLength(255), Column("username")]
         public string Username { get; set; } = null!;   // format: <kode_faskes.username>
 
-        [Required, MaxLength(255)]
+        [Required, MaxLength(255), Column("password_hash")]
         public string PasswordHash { get; set; } = null!;
 
-        public long? CorporateId { get; set; }
+        [Column("corporate_id")] public long? CorporateId { get; set; }
         public Corporate? Corporate { get; set; }
 
-        public long FaskesId { get; set; }
+        [Column("faskes_id")] public long FaskesId { get; set; }
         public Faskes Faskes { get; set; } = null!;
 
-        [MaxLength(255)] public string? Email { get; set; }
-        [MaxLength(20)] public string? PhoneNumber { get; set; }
 
-        public bool IsActive { get; set; } = true;
-        public bool IsDeleted { get; set; }
+        [Required, MaxLength(255), Column("email")]
+        public string? Email { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-        public long CreatorId { get; set; }
+        [Required, MaxLength(20), Column("phone")]
+        public string? PhoneNumber { get; set; }
 
-        public DateTime? UpdatedAt { get; set; }
-        public long? UpdaterId { get; set; }
+        [Column("is_active")] public bool IsActive { get; set; } = true;
+        [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
+
+        [Column("created_at")] public DateTime CreatedAt { get; set; }
+        [Column("creator_id")] public long CreatorId { get; set; }
+
+        [Column("updated_at")] public DateTime? UpdatedAt { get; set; }
+        [Column("updater_id")] public long? UpdaterId { get; set; }
     }
 }

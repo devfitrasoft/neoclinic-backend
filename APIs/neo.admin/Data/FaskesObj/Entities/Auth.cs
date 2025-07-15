@@ -7,30 +7,35 @@ namespace neo.admin.Data.FaskesObj.Entities
     [Table("sys_auth")]
     public class Auth
     {
-        [Key] public int Id { get; set; }
-        [Required] public int RoleId { get; set; }  // FK to db_neoclinic_{noFaskes}.sys_role
+        [Key, Column("id")] public int Id { get; set; }
+        [Required, Column("role_id")] public int RoleId { get; set; }  // FK to db_neoclinic_{noFaskes}.sys_role
         public Role Role { get; set; } = null!;
 
-        [Required, MaxLength(2)] public string ModuleCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_module
+        [Required, MaxLength(2), Column("module_code")] 
+        public string ModuleCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_module
         public Module Module { get; set; } = null!;
-        [Required, MaxLength(2)] public string GroupCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_group
+
+        [Required, MaxLength(2), Column("group_code")] 
+        public string GroupCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_group
         public Group Group { get; set; } = null!;
-        [Required, MaxLength(2)] public string MenuCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_menu
+
+        [Required, MaxLength(2), Column("menu_code")] 
+        public string MenuCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_menu
         public Menu Menu { get; set; } = null!;
 
-        public bool View { get; set; }
-        public bool Add { get; set; }
-        public bool Edit { get; set; }
-        public bool Delete { get; set; }
-        public bool Print { get; set; }
+        [Column("view")] public bool View { get; set; }
+        [Column("add")] public bool Add { get; set; }
+        [Column("edit")] public bool Edit { get; set; }
+        [Column("delete")] public bool Delete { get; set; }
+        [Column("print")] public bool Print { get; set; }
 
-        public bool? IsActive { get; set; }
-        public bool? IsDeleted { get; set; }
+        [Column("is_active")] public bool? IsActive { get; set; }
+        [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
 
-        public DateTime CreatedAt { get; set; }
-        public long CreatorId { get; set; }
+        [Column("created_at")] public DateTime CreatedAt { get; set; }
+        [Column("creator_id")] public long CreatorId { get; set; }
 
-        public DateTime? UpdatedAt { get; set; }
-        public long? UpdaterId { get; set; }
+        [Column("updated_at")] public DateTime? UpdatedAt { get; set; }
+        [Column("updater_id")] public long? UpdaterId { get; set; }
     }
 }

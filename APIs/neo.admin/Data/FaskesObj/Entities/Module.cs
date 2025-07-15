@@ -7,17 +7,21 @@ namespace neo.admin.Data.FaskesObj.Entities
     [Table("sys_module")]
     public class Module
     {
-        [Key] public int Id { get; set; }
-        [Required, MaxLength(2)] public string Code { get; set; } = null!;
-        [Required, MaxLength(50)] public string Name { get; set; } = null!;
+        [Key, Column("id")] public int Id { get; set; }
 
-        public bool? IsActive { get; set; }
-        public bool? IsDeleted { get; set; }
+        [Required, MaxLength(2), Column("code")]
+        public string Code { get; set; } = null!;
 
-        public DateTime CreatedAt { get; set; }
-        public long CreatorId { get; set; }
+        [Required, MaxLength(50), Column("name")]
+        public string Name { get; set; } = null!;
 
-        public DateTime? UpdatedAt { get; set; }
-        public long? UpdaterId { get; set; }
+        [Column("is_active")] public bool? IsActive { get; set; }
+        [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
+
+        [Column("created_at")] public DateTime CreatedAt { get; set; }
+        [Column("creator_id")] public long CreatorId { get; set; }
+
+        [Column("updated_at")] public DateTime? UpdatedAt { get; set; }
+        [Column("updater_id")] public long? UpdaterId { get; set; }
     }
 }

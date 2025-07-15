@@ -1,21 +1,20 @@
-﻿// Services/FaskesQueryService.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
 using neo.admin.Data.Enterprise.Entities;
 using neo.admin.Models;
 
-namespace neo.admin.Data.Services
+namespace neo.admin.Queries
 {
-    public sealed class FaskesQueryService
+    public sealed class FaskesQueries
     {
         private readonly EnterpriseDbContext _db;
-        public FaskesQueryService(EnterpriseDbContext db) => _db = db;
+        public FaskesQueries(EnterpriseDbContext db) => _db = db;
 
         public Task<FaskesInfoResponse?> GetAsync(string noFaskes, CancellationToken ct) =>
             _db.Faskeses
                .Where(f => f.NoFaskes == noFaskes)
                .Select(f => new FaskesInfoResponse(
-                    f.Id, f.Name, f.Email, f.PhoneNumber, f.Address,
+                    f.Id, f.Name, f.Email, f.Phone, f.Address,
                     f.IsActive, f.CorporateId,
                     f.Corporate != null ? f.Corporate.Name : null))
                .FirstOrDefaultAsync(ct);
@@ -35,7 +34,7 @@ namespace neo.admin.Data.Services
                 CorporateId = corp?.Id,
                 Corporate = corp,
                 Email = req.Email,
-                PhoneNumber = req.Phone,
+                Phone = req.Phone,
                 Address = req.Address,
                 RegisteredDate = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,

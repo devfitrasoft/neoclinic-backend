@@ -7,19 +7,25 @@ namespace neo.admin.Data.FaskesObj.Entities
     [Table("sys_group")]
     public class Group
     {
-        [Key] public int Id { get; set; }
-        [Required, MaxLength(2)] public string ModuleCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_module
+        [Key, Column("id")] public int Id { get; set; }
+        
+        [Required, MaxLength(2), Column("module_code")] 
+        public string ModuleCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_module
         public Module Module { get; set; } = null!;
-        [Required, MaxLength(2)] public string Code { get; set; } = null!;
-        [Required, MaxLength(50)] public string Name { get; set; } = null!;
+        
+        [Required, MaxLength(2), Column("code")] 
+        public string Code { get; set; } = null!;
 
-        public bool? IsActive { get; set; }
-        public bool? IsDeleted { get; set; }
+        [Required, MaxLength(50), Column("name")] 
+        public string Name { get; set; } = null!;
 
-        public DateTime CreatedAt { get; set; }
-        public long CreatorId { get; set; }
+        [Column("is_active")] public bool? IsActive { get; set; }
+        [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
 
-        public DateTime? UpdatedAt { get; set; }
-        public long? UpdaterId { get; set; }
+        [Column("created_at")] public DateTime CreatedAt { get; set; }
+        [Column("creator_id")] public long CreatorId { get; set; }
+
+        [Column("updated_at")] public DateTime? UpdatedAt { get; set; }
+        [Column("updater_id")] public long? UpdaterId { get; set; }
     }
 }
