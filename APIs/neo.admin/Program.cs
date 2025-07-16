@@ -75,7 +75,7 @@ app.MapGet("/faskes/search/{noFaskes}",
     async (string noFaskes, FaskesQueries q, CancellationToken ct) =>
         await q.GetAsync(noFaskes, ct) is { } info
             ? Results.Ok(info)
-            : Results.Ok());
+            : Results.NoContent());
 
 /* 2. GET corporations search */
 app.MapGet("/corporates",

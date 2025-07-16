@@ -14,14 +14,33 @@ namespace neo.preregist.Services
             _email = email;
         }
 
-        public Task SendNotifAsync(string toEmail, ProductTypes product, string otp)
+        public async Task SendNotifAsync(string toEmail, ProductTypes product, string otp)
         {
-            var header = determineHeader(product);
-            var html = generateBody(product, otp);
+            if (product == ProductTypes.Web || product == ProductTypes.Desktop)
+            {
+                var header = determineHeader(product);
+                var html = generateBody(product, otp);
 
-            return _email.SendAsync(toEmail,
-                header,
-                html);
+                await _email.SendAsync(toEmail,
+                    header,
+                    html);
+            }
+            else if(product == ProductTypes.Both)
+            {
+                var header = determineHeader(ProductTypes.Web);
+                var html = generateBody(ProductTypes.Web, otp);
+
+                await _email.SendAsync(toEmail,
+                    header,
+                    html);
+
+                header = determineHeader(ProductTypes.Desktop);
+                html = generateBody(ProductTypes.Desktop, otp);
+
+                await _email.SendAsync(toEmail,
+                    header,
+                    html);
+            }
         }
 
         private string determineHeader(ProductTypes product)
@@ -37,7 +56,7 @@ namespace neo.preregist.Services
 
             if(product == ProductTypes.Web)
             {
-                var link = $"{_cfg["App:RegisterWebUrl"]}/registration?token={otp}";
+                var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={otp}";
                 var otpExpiry = _cfg["PreRegistToken:Expiry"];
 
                 body = TemplateRenderer.Render("""

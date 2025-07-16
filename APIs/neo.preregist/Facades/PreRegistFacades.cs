@@ -36,6 +36,7 @@ namespace neo.preregist.Facades
             Tuple<string,DateTime> OtpAndExpiry = Tuple.Create(string.Empty, DateTime.UtcNow);
             PrefComms prefComm = (PrefComms)req.PrefComm;
             ProductTypes product = (ProductTypes)req.ProductType;
+            bool needsOtp = false;  //  Generate OTP if product is either web or both
             try
             {
 
@@ -44,46 +45,34 @@ namespace neo.preregist.Facades
 
                 if (row != null)
                 {
-
-                    /*  2.  Send the response informing whether this existing row (email/phone/both) already registered
-                     *      to either web/desktop/both services. Depending on these return flags, UI will raise a message :
-                     *      
-                     *      (IsRegisteredWeb && IsRegisteredDesktop) => "Email/Nomor telepon ini (depend on prefCom flag) telah didaftarkan untuk semua produk"
-                     *      (!IsRegisteredWeb && IsRegisteredDesktop)
-                     *          => "Email/Nomor telepon ini (depend on prefComm flag) saat ini telah didaftarkan untuk produk Neoclinic Desktop. Namun anda dapat mengecek email anda
-                     *              apabila ingin melakukan registrasi produk Neoclinic Web"
-                     *      (IsRegisteredWeb && !IsRegisteredDesktop)
-                     *          => "Email/Nomor telepon ini (depend on prefComm flag) saat ini telah didaftarkan untuk produk Neoclinic Web. Namun administrator akan tetap menghubungi
-                     *              anda melalui email/whatsapp untuk memastikan apakah anda ingin melakukan registrasi produk Neoclinic Desktop"
-                     *      
-                     */
-
-                    /*  3.  Based on preferred product (1 Web/2 Desktop/3 Both) check both is_registered_web && is_registered_desktop 
-                     *      so that in case both or one of them had registered and current request also refer to said product,
-                     *      we don't need to bother re-generating Otp again.
-                     */
-
-                    bool needsOtpForWeb = (product == ProductTypes.Web || product == ProductTypes.Both) && !row.IsRegisteredWeb;
-                    if (needsOtpForWeb)
+                    if (row.IsRegisteredWeb && row.IsRegisteredDesktop)
                     {
-                        OtpAndExpiry = DoGenerateHashedOtp();
+                        response = GenerateResponse(PreRegistSaveResponse.Registered, prefComm, false, "Registered", row.IsRegisteredWeb, row.IsRegisteredDesktop);
+                    }
+                    else
+                    {
+                        needsOtp = (product == ProductTypes.Web || product == ProductTypes.Both) && !row.IsRegisteredWeb;
+                        if (needsOtp)
+                        {
+                            OtpAndExpiry = DoGenerateHashedOtp();
 
-                        await _query.UpdateOtpAsync(row, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
+                            await _query.UpdateOtpAsync(row, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
+                        }
 
-                        await _mail.SendNotifAsync(req.Email, product, OtpAndExpiry.Item1);
+                        if (prefComm == PrefComms.Email || prefComm == PrefComms.Both)
+                            await _mail.SendNotifAsync(req.Email, product, OtpAndExpiry.Item1);
 
                         //if (prefComm == PrefComms.Phone || prefComm == PrefComms.Both)
                         //    await _notifier.SendWhatsappAsync(req.Phone, product, plainOtp);
+
+                        response = GenerateResponse(PreRegistSaveResponse.Updated, prefComm, true, "Updated", row.IsRegisteredWeb, row.IsRegisteredDesktop);
                     }
-
-                    await _mail.SendNotifAsync(req.Email, product, OtpAndExpiry.Item1);
-
-                    response = GenerateResponse(PreRegistSaveResponse.Updated, prefComm, true, "Updated", row.IsRegisteredWeb, row.IsRegisteredDesktop);
                     return response;
                 }
 
                 //  2. Generate Otp character varying(255)
-                OtpAndExpiry = DoGenerateHashedOtp();
+                needsOtp = (product == ProductTypes.Web || product == ProductTypes.Both);
+                OtpAndExpiry = needsOtp ? DoGenerateHashedOtp() : OtpAndExpiry;
 
                 //  3. Store the Pre-registration data along with Otp
                 await _query.AddAsync(req, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);

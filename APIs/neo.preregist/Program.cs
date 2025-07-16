@@ -8,6 +8,7 @@ using Shared.Mailing;
 using Shared.EFCore;
 using Shared.Logging;
 using System.ComponentModel.DataAnnotations;
+using neo.admin.Common;
 
 var b = WebApplication.CreateBuilder(args);
 
@@ -68,7 +69,21 @@ app.MapPost("/pre-register",
         }
 
         var res = await facade.SaveAndNotify(req, ct);
-        return Results.Created($"/pre-register", res);
+
+        if (res != null)
+        {
+            return res.Status switch
+            {
+                PreRegistSaveResponse.Created => Results.Created("/pre-register", res),
+                PreRegistSaveResponse.Updated => Results.Ok(res),
+                PreRegistSaveResponse.Error => Results.Json(res, statusCode: StatusCodes.Status500InternalServerError),
+                _ => Results.Json(res, statusCode: StatusCodes.Status500InternalServerError)
+            };
+        }
+        else
+        {
+            return Results.StatusCode(StatusCodes.Status500InternalServerError);
+        }
     });
 
 app.Run();

@@ -18,6 +18,7 @@
     {
         Created,
         Updated,
-        Error
+        Error,
+        Registered
     }
 }
