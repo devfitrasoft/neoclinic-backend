@@ -1,6 +1,11 @@
 ﻿namespace neo.admin.Services
 {
-    public sealed class CaptchaValidatorService : ICaptchaValidator
+    public interface ICaptchaValidatorService
+    {
+        Task<bool> VerifyAsync(string token, CancellationToken ct = default);
+    }
+
+    public sealed class CaptchaValidatorService : ICaptchaValidatorService
     {
         private readonly IConfiguration _cfg;
         private readonly HttpClient _http;

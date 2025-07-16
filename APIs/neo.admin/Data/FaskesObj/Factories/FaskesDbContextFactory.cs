@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Shared.Common;
 
 namespace neo.admin.Data.FaskesObj.Factories
 {

@@ -1,34 +1,35 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace neo.admin.Models
 {
     public sealed record RegisterFaskesRequest
     {
-        [JsonPropertyName("noFaskes")]
+        [JsonPropertyName("noFaskes"), Required]
         public string NoFaskes { get; init; } = null!;
 
-        [JsonPropertyName("name")]
+        [JsonPropertyName("name"), Required]
         public string Name { get; init; } = null!;
 
-        [JsonPropertyName("address")]
+        [JsonPropertyName("address"), Required]
         public string Address { get; init; } = null!;
 
-        [JsonPropertyName("isCorporate")]
+        [JsonPropertyName("isCorporate"), Required]
         public bool IsCorporate { get; init; }
 
-        [JsonPropertyName("corporateName")]
+        [JsonPropertyName("corporateName"), Required]
         public string? CorporateName { get; init; }
 
-        [JsonPropertyName("corporateId")]
+        [JsonPropertyName("corporateId"), Required]
         public long? CorporateId { get; init; }
 
-        [JsonPropertyName("email")]
+        [JsonPropertyName("email"), Required]
         public string Email { get; init; } = null!;
 
-        [JsonPropertyName("phone")]
+        [JsonPropertyName("phone"), Required]
         public string Phone { get; init; } = null!;
 
-        [JsonPropertyName("captcha")]
+        [JsonPropertyName("captcha"), Required]
         public string CaptchaToken { get; init; } = null!;
     }
 }

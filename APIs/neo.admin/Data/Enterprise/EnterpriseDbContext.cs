@@ -19,12 +19,18 @@ namespace neo.admin.Data.Enterprise
             // ---- sys_corporate ---------------------------------
             b.Entity<Corporate>(e =>
             {
+                e.Property(c => c.Id)
+                 .UseIdentityByDefaultColumn();
+
                 e.HasIndex(c => c.Name).IsUnique();
             });
 
             // ---- sys_faskes ------------------------------------
             b.Entity<Faskes>(e =>
             {
+                e.Property(f => f.Id)
+                 .UseIdentityByDefaultColumn();
+
                 e.HasIndex(f => f.NoFaskes).IsUnique();
                 e.HasIndex(f => f.Name);
                 e.HasOne(f => f.Corporate)
@@ -36,12 +42,17 @@ namespace neo.admin.Data.Enterprise
             // ---- sys_login -------------------------------------
             b.Entity<Login>(e =>
             {
+                e.Property(l => l.Id)
+                 .UseIdentityByDefaultColumn();
+
                 e.HasIndex(l => l.Username).IsUnique();
                 e.HasIndex(l => l.Email);
+
                 e.HasOne(l => l.Faskes)
                   .WithMany(f => f.Logins)
                   .HasForeignKey(l => l.FaskesId)
                   .OnDelete(DeleteBehavior.Cascade);
+
                 e.HasOne(l => l.Corporate)
                   .WithMany()
                   .HasForeignKey(l => l.CorporateId)
@@ -51,20 +62,15 @@ namespace neo.admin.Data.Enterprise
             // ---- sys_connstring ---------------------------------
             b.Entity<ConnString>(e =>
             {
-                e.HasKey(x => x.Id);
                 e.Property(x => x.Id)
-                 .HasColumnName("id")
                  .UseIdentityByDefaultColumn();              // auto‑increment (bigserial)
 
-                e.Property(x => x.LoginId).HasColumnName("login_id").IsRequired();
+                e.Property(x => x.LoginId)
+                 .IsRequired();
+
                 e.HasOne(x => x.Login)
                  .WithMany()
                  .HasForeignKey(x => x.LoginId);
-
-                e.Property(x => x.DbName).HasColumnName("db_name").HasColumnType("varchar(255)");
-                e.Property(x => x.DbHost).HasColumnName("db_host").HasColumnType("varchar(50)");
-                e.Property(x => x.DbUsername).HasColumnName("db_username").HasColumnType("varchar(255)");
-                e.Property(x => x.DbPassword).HasColumnName("db_password").HasColumnType("varchar(255)");
             });
         }
     }

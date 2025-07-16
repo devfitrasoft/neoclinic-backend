@@ -7,19 +7,19 @@ namespace neo.admin.Data.Enterprise.Entities
     [Table("sys_corporate")]
     public class Corporate
     {
-        [Key] public long Id { get; set; }
+        [Key, Column("id")] public long Id { get; set; }
 
-        [Required, MaxLength(255)]
+        [Required, MaxLength(255), Column("name")]
         public string Name { get; set; } = null!;     // store upper‑case in code or via trigger
 
-        public bool IsActive { get; set; } = true;
-        public bool IsDeleted { get; set; }
+        [Column("is_active")] public bool IsActive { get; set; } = true;
+        [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
 
-        public DateTime CreatedAt { get; set; }
-        public long CreatorId { get; set; }
+        [Column("created_at")] public DateTime CreatedAt { get; set; }
+        [Column("creator_id")] public long CreatorId { get; set; }
 
-        public DateTime? UpdatedAt { get; set; }
-        public long? UpdaterId { get; set; }
+        [Column("updated_at")] public DateTime? UpdatedAt { get; set; }
+        [Column("updater_id")] public long? UpdaterId { get; set; }
 
         /* nav */
         public ICollection<Faskes> Faskes { get; set; } = new List<Faskes>();

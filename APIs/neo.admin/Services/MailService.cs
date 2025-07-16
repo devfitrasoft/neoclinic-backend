@@ -10,7 +10,7 @@ namespace neo.admin.Services
         private readonly IConfiguration _cfg;
         private readonly RegistrationSettings _regSettings;
 
-        public MailService( IConfiguration cfg,IEmailSender email, IOptions<RegistrationSettings> regSettings)
+        public MailService( IConfiguration cfg, IEmailSender email, IOptions<RegistrationSettings> regSettings)
         {
             _cfg = cfg;
             _email = email;
@@ -19,7 +19,7 @@ namespace neo.admin.Services
 
         public Task SendInviteAsync(string toEmail, long faskesId, long loginId)
         {
-            var link = $"{_cfg["App:FrontendUrl"]}/setup-su?f={faskesId}&u={loginId}";
+            var link = $"{_cfg["App:RegisterWebUrl"]}/setup-su?f={faskesId}&u={loginId}";
             var html = TemplateRenderer.Render("""
             <h2>Selamat datang di NeoClinic</h2>
             <p>Akun Super User Anda hampir siap. Klik tautan di bawah untuk membuat kata sandi:</p>

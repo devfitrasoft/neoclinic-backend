@@ -3,12 +3,12 @@ using neo.admin.Data.Enterprise;
 using neo.admin.Data.Enterprise.Entities;
 using neo.admin.Models;
 
-namespace neo.admin.Services
+namespace neo.admin.Queries
 {
-    public sealed class CorporateQueryService
+    public sealed class CorporateQueries
     {
         private readonly EnterpriseDbContext _db;
-        public CorporateQueryService(EnterpriseDbContext db) => _db = db;
+        public CorporateQueries(EnterpriseDbContext db) => _db = db;
 
         public Task<List<CorporateLookupItem>> SearchAsync(string term, CancellationToken ct) =>
             _db.Corporates
