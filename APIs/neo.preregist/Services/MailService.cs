@@ -1,4 +1,5 @@
 ﻿using neo.admin.Common;
+using neo.preregist.Common;
 using Shared.Mailing;
 
 namespace neo.preregist.Services
@@ -57,7 +58,7 @@ namespace neo.preregist.Services
             if(product == ProductTypes.Web)
             {
                 var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={otp}";
-                var otpExpiry = _cfg["PreRegistToken:Expiry"];
+                var otpExpiry = _cfg["PreRegistToken:Expiry"] ?? LocalConstants.OTP_EXPIRY_IN_MINUTE;
 
                 body = TemplateRenderer.Render("""
                 <p>Terimakasih sudah memilih produk Desktop dari aplikasi Neoclinic!</p>

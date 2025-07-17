@@ -1,6 +1,7 @@
 ﻿using neo.admin.Common;
 using neo.preregist.Common;
 using neo.preregist.Data.Enterprise;
+using neo.preregist.Data.Enterprise.Entities;
 using neo.preregist.Models;
 using neo.preregist.Queries;
 using neo.preregist.Services;
@@ -12,6 +13,7 @@ namespace neo.preregist.Facades
     public interface IPreRegistFacade 
     {
         Task<PreRegistResponse> SaveAndNotify(PreRegistRequest req, CancellationToken ct);
+        Task<PreRegist?> GetRowByTokenAsync(string token, CancellationToken ct);
     }
 
     public sealed class PreRegistFacades : IPreRegistFacade
@@ -36,7 +38,9 @@ namespace neo.preregist.Facades
             Tuple<string,DateTime> OtpAndExpiry = Tuple.Create(string.Empty, DateTime.UtcNow);
             PrefComms prefComm = (PrefComms)req.PrefComm;
             ProductTypes product = (ProductTypes)req.ProductType;
-            bool needsOtp = false;  //  Generate OTP if product is either web or both
+            bool isSelectedWebRegistered = false;  //  Generate OTP if product is either web or both
+            bool isSelectedDesktopRegistered = false;
+
             try
             {
 
@@ -51,19 +55,28 @@ namespace neo.preregist.Facades
                     }
                     else
                     {
-                        needsOtp = (product == ProductTypes.Web || product == ProductTypes.Both) && !row.IsRegisteredWeb;
-                        if (needsOtp)
+                        isSelectedWebRegistered = (product == ProductTypes.Web || product == ProductTypes.Both) && row.IsRegisteredWeb;
+                        isSelectedDesktopRegistered = (product == ProductTypes.Desktop || product == ProductTypes.Both) && row.IsRegisteredDesktop;
+                        
+                        //  2. Generate OTP for web only if this pre-registered user has yet to be registered to it
+                        if (!isSelectedWebRegistered)
                         {
                             OtpAndExpiry = DoGenerateHashedOtp();
 
                             await _query.UpdateOtpAsync(row, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
                         }
 
+                        //  3. Send the mail only if pre-registered user has yet to be registered to the desired product (web/desktop/both)
                         if (prefComm == PrefComms.Email || prefComm == PrefComms.Both)
-                            await _mail.SendNotifAsync(req.Email, product, OtpAndExpiry.Item1);
+                        {
+                            //  Later would add phone here (whatsapp)
 
-                        //if (prefComm == PrefComms.Phone || prefComm == PrefComms.Both)
-                        //    await _notifier.SendWhatsappAsync(req.Phone, product, plainOtp);
+                            if(!isSelectedWebRegistered)
+                                await _mail.SendNotifAsync(req.Email, ProductTypes.Web, OtpAndExpiry.Item1);
+
+                            if(!isSelectedDesktopRegistered)
+                                await _mail.SendNotifAsync(req.Email, ProductTypes.Desktop, OtpAndExpiry.Item1);
+                        }
 
                         response = GenerateResponse(PreRegistSaveResponse.Updated, prefComm, true, "Updated", row.IsRegisteredWeb, row.IsRegisteredDesktop);
                     }
@@ -71,8 +84,8 @@ namespace neo.preregist.Facades
                 }
 
                 //  2. Generate Otp character varying(255)
-                needsOtp = (product == ProductTypes.Web || product == ProductTypes.Both);
-                OtpAndExpiry = needsOtp ? DoGenerateHashedOtp() : OtpAndExpiry;
+                isSelectedWebRegistered = (product == ProductTypes.Web || product == ProductTypes.Both);
+                OtpAndExpiry = isSelectedWebRegistered ? DoGenerateHashedOtp() : OtpAndExpiry;
 
                 //  3. Store the Pre-registration data along with Otp
                 await _query.AddAsync(req, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
@@ -81,8 +94,7 @@ namespace neo.preregist.Facades
                 if (prefComm == PrefComms.Email || prefComm == PrefComms.Both)
                     await _mail.SendNotifAsync(req.Email, product, OtpAndExpiry.Item1);
 
-                //if (prefComm == PrefComms.Phone || prefComm == PrefComms.Both)
-                //    await _notifier.SendWhatsappAsync(req.Phone, product, newPlainOtp);
+                // later would add the whatsapp here
             }
             catch (Exception ex)
             {
@@ -95,6 +107,9 @@ namespace neo.preregist.Facades
             //  6. Send return response to caller so UI can show the 
             return response;
         }
+
+        public async Task<PreRegist?> GetRowByTokenAsync(string token, CancellationToken ct)
+            => await _query.GetRowByTokenAsync(token, ct);
 
         private Tuple<string,DateTime> DoGenerateHashedOtp()
         {

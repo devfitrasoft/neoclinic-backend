@@ -9,6 +9,7 @@ using Shared.EFCore;
 using Shared.Logging;
 using System.ComponentModel.DataAnnotations;
 using neo.admin.Common;
+using neo.preregist.Queries;
 
 var b = WebApplication.CreateBuilder(args);
 
@@ -76,6 +77,7 @@ app.MapPost("/pre-register",
             {
                 PreRegistSaveResponse.Created => Results.Created("/pre-register", res),
                 PreRegistSaveResponse.Updated => Results.Ok(res),
+                PreRegistSaveResponse.Registered => Results.Json(res, statusCode: StatusCodes.Status202Accepted),
                 PreRegistSaveResponse.Error => Results.Json(res, statusCode: StatusCodes.Status500InternalServerError),
                 _ => Results.Json(res, statusCode: StatusCodes.Status500InternalServerError)
             };
@@ -84,6 +86,34 @@ app.MapPost("/pre-register",
         {
             return Results.StatusCode(StatusCodes.Status500InternalServerError);
         }
+    });
+
+app.MapGet("pre-register/verify",
+    async (string token, IPreRegistFacade facade, CancellationToken ct) =>
+    {
+        var row = await facade.GetRowByTokenAsync(token, ct);
+
+        if (row == null)
+        {
+            return Results.Unauthorized(); // Token not found
+        }
+
+        //  3. Check if token is expired
+        if (!row.OtpExpiresAt.HasValue || row.OtpExpiresAt.Value < DateTime.UtcNow)
+        {
+            return Results.Unauthorized(); // Token expired
+        }
+
+        //  4. Check if is_registered_web = true
+        if(row.IsRegisteredWeb)
+            return Results.Unauthorized(); // Token expired
+
+        //  5. Return essential data
+        return Results.Ok(new TokenVerifyResponse()
+        {
+            Success = true,
+            Data = row
+        });
     });
 
 app.Run();
