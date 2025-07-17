@@ -12,8 +12,8 @@ using neo.preregist.Data.Enterprise;
 namespace neo.preregist.Migrations.Enterprise
 {
     [DbContext(typeof(EnterpriseDbContext))]
-    [Migration("20250715142452_InitEnterpriseSchema")]
-    partial class InitEnterpriseSchema
+    [Migration("20250717070035_InitEnterprisePreRegistSchema")]
+    partial class InitEnterprisePreRegistSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

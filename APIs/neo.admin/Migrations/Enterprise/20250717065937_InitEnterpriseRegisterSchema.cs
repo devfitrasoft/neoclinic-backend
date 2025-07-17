@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace neo.admin.Migrations.Enterprise
 {
     /// <inheritdoc />
-    public partial class InitEnterpriseSchema : Migration
+    public partial class InitEnterpriseRegisterSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,6 +42,10 @@ namespace neo.admin.Migrations.Enterprise
                     corporate_id = table.Column<long>(type: "bigint", nullable: true),
                     email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    email_bill = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    phone_bill = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    email_tech = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    phone_tech = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     address = table.Column<string>(type: "text", nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),

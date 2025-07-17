@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace neo.preregist.Migrations.Enterprise
 {
     /// <inheritdoc />
-    public partial class InitEnterpriseSchema : Migration
+    public partial class InitEnterprisePreRegistSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

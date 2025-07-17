@@ -24,6 +24,18 @@ namespace neo.admin.Data.Enterprise.Entities
         [Required, MaxLength(20), Column("phone")] 
         public string Phone { get; set; } = null!;
 
+        [MaxLength(255), Column("email_bill")]
+        public string? EmailBill { get; set; }
+
+        [MaxLength(20), Column("phone_bill")]
+        public string? PhoneBill { get; set; }
+
+        [MaxLength(255), Column("email_tech")]
+        public string? EmailTech { get; set; }
+
+        [MaxLength(20), Column("phone_tech")]
+        public string? PhoneTech { get; set; }
+
         [Required, Column("address")] public string Address { get; set; } = null!;
 
         [Column("is_active")] public bool IsActive { get; set; } = true;

@@ -14,8 +14,10 @@ namespace neo.admin.Queries
             _db.Faskeses
                .Where(f => f.NoFaskes == noFaskes)
                .Select(f => new FaskesInfoResponse(
-                    f.Id, f.Name, f.Email, f.Phone, f.Address,
-                    f.IsActive, f.CorporateId,
+                    f.Id, f.Name, f.Email, f.Phone,
+                    f.EmailBill, f.PhoneBill,
+                    f.EmailTech, f.PhoneTech,
+                    f.Address, f.IsActive, f.CorporateId,
                     f.Corporate != null ? f.Corporate.Name : null))
                .FirstOrDefaultAsync(ct);
 
@@ -35,6 +37,10 @@ namespace neo.admin.Queries
                 Corporate = corp,
                 Email = req.Email,
                 Phone = req.Phone,
+                EmailBill = req.EmailBill,
+                PhoneBill = req.PhoneBill,
+                EmailTech = req.EmailTech,
+                PhoneTech = req.PhoneTech,
                 Address = req.Address,
                 RegisteredDate = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,

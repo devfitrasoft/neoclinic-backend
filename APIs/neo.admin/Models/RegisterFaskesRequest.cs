@@ -17,10 +17,10 @@ namespace neo.admin.Models
         [JsonPropertyName("isCorporate"), Required]
         public bool IsCorporate { get; init; }
 
-        [JsonPropertyName("corporateName"), Required]
+        [JsonPropertyName("corporateName")]
         public string? CorporateName { get; init; }
 
-        [JsonPropertyName("corporateId"), Required]
+        [JsonPropertyName("corporateId")]
         public long? CorporateId { get; init; }
 
         [JsonPropertyName("email"), Required]
@@ -28,6 +28,18 @@ namespace neo.admin.Models
 
         [JsonPropertyName("phone"), Required]
         public string Phone { get; init; } = null!;
+
+        [JsonPropertyName("email_bill")]
+        public string EmailBill { get; init; } = null!;
+
+        [JsonPropertyName("phone_bill")]
+        public string PhoneBill { get; init; } = null!;
+
+        [JsonPropertyName("email_tech")]
+        public string EmailTech { get; init; } = null!;
+
+        [JsonPropertyName("phone_tech")]
+        public string PhoneTech { get; init; } = null!;
 
         [JsonPropertyName("captcha"), Required]
         public string CaptchaToken { get; init; } = null!;

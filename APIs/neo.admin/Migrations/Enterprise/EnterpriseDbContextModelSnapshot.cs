@@ -169,6 +169,16 @@ namespace neo.admin.Migrations.Enterprise
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
+                    b.Property<string>("EmailBill")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email_bill");
+
+                    b.Property<string>("EmailTech")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email_tech");
+
                     b.Property<DateTime?>("ExpiredDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expired_date");
@@ -214,6 +224,16 @@ namespace neo.admin.Migrations.Enterprise
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
+
+                    b.Property<string>("PhoneBill")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone_bill");
+
+                    b.Property<string>("PhoneTech")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone_tech");
 
                     b.Property<DateTime>("RegisteredDate")
                         .HasColumnType("timestamp with time zone")
