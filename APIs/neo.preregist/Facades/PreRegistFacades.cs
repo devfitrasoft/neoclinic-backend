@@ -7,13 +7,14 @@ using neo.preregist.Queries;
 using neo.preregist.Services;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Linq;
 
 namespace neo.preregist.Facades
 {
     public interface IPreRegistFacade 
     {
         Task<PreRegistResponse> SaveAndNotify(PreRegistRequest req, CancellationToken ct);
-        Task<PreRegist?> GetRowByTokenAsync(string token, CancellationToken ct);
+        Task<PreRegistData?> GetRowByTokenAsync(string token, CancellationToken ct);
     }
 
     public sealed class PreRegistFacades : IPreRegistFacade
@@ -108,9 +109,24 @@ namespace neo.preregist.Facades
             return response;
         }
 
-        public async Task<PreRegist?> GetRowByTokenAsync(string token, CancellationToken ct)
-            => await _query.GetRowByTokenAsync(token, ct);
+        public async Task<PreRegistData?> GetRowByTokenAsync(string token, CancellationToken ct)
+        {
+            var row = await _query.GetRowByTokenAsync(token, ct);
 
+            if(row == null)
+            {
+                return null;
+            }
+
+            return new PreRegistData(
+                row.Name, 
+                row.Email,
+                row.Phone,
+                row.OtpExpiresAt,
+                row.IsRegisteredWeb,
+                row.IsRegisteredDesktop);
+        }
+            
         private Tuple<string,DateTime> DoGenerateHashedOtp()
         {
             string plainOtp = GenerateOtp();
@@ -138,14 +154,22 @@ namespace neo.preregist.Facades
         }
 
         private PreRegistResponse GenerateResponse(PreRegistSaveResponse status, PrefComms prefComm, bool isSuccess = false, string message = "", bool isRegisteredWeb = false, bool isRegisteredDesktop = false)
-            => new PreRegistResponse()
+        {
+            var data = new PreRegistResponseData(
+                status,
+                prefComm,
+                isRegisteredWeb,
+                isRegisteredDesktop
+            );
+            
+            var response = new PreRegistResponse()
             {
                 Success = isSuccess,
-                Status = status,
                 Message = message,
-                PrefComm = prefComm,
-                IsRegisteredWeb = isRegisteredWeb,
-                IsRegisteredDesktop = isRegisteredDesktop
+                Data = data
             };
+
+            return response;
+        }
     }
 }

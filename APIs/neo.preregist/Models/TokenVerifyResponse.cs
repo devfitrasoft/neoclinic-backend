@@ -7,6 +7,15 @@ namespace neo.preregist.Models
     public sealed class TokenVerifyResponse : CommonAPIBodyResponse
     {
         [JsonPropertyName("data")]
-        public PreRegist? Data { get; set; }
+        public PreRegistData? Data { get; set; }
     }
+
+    public sealed record PreRegistData(
+        string? name,
+        string? email,
+        string? phone,
+        DateTime? otpExpiresAt,
+        bool isRegisteredWeb,
+        bool isRegisteredDesktop
+        );
 }

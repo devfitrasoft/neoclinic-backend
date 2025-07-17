@@ -38,7 +38,7 @@ namespace neo.preregist.Queries
         }
 
         public async Task<PreRegist?> GetRowByTokenAsync(string token,  CancellationToken ct)
-            => _db.PreRegists.FirstOrDefaultAsync(r => r.Otp == token).Result;
+            => await _db.PreRegists.FirstOrDefaultAsync(r => r.Otp == token);
 
         public async Task AddAsync(PreRegistRequest req, string? newHashedOtp, DateTime? newExpiresAt, CancellationToken ct)
         {

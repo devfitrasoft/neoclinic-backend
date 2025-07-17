@@ -73,7 +73,7 @@ app.MapPost("/pre-register",
 
         if (res != null)
         {
-            return res.Status switch
+            return res.Data.status switch
             {
                 PreRegistSaveResponse.Created => Results.Created("/pre-register", res),
                 PreRegistSaveResponse.Updated => Results.Ok(res),
@@ -99,13 +99,13 @@ app.MapGet("pre-register/verify",
         }
 
         //  3. Check if token is expired
-        if (!row.OtpExpiresAt.HasValue || row.OtpExpiresAt.Value < DateTime.UtcNow)
+        if (!row.otpExpiresAt.HasValue || row.otpExpiresAt.Value < DateTime.UtcNow)
         {
             return Results.Unauthorized(); // Token expired
         }
 
         //  4. Check if is_registered_web = true
-        if(row.IsRegisteredWeb)
+        if(row.isRegisteredWeb)
             return Results.Unauthorized(); // Token expired
 
         //  5. Return essential data
