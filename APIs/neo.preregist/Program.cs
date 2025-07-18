@@ -8,8 +8,7 @@ using Shared.Mailing;
 using Shared.EFCore;
 using Shared.Logging;
 using System.ComponentModel.DataAnnotations;
-using neo.admin.Common;
-using neo.preregist.Queries;
+using neo.preregist.Common;
 
 var b = WebApplication.CreateBuilder(args);
 
@@ -105,9 +104,8 @@ app.MapGet("pre-register/verify",
         }
 
         //  4. Check if is_registered_web = true
-        if(row.isRegisteredWeb)
-            return Results.Unauthorized(); // Token expired
-
+        if(row.isRegistered)
+            return Results.Conflict(); // Account already registered, henche conflict
         //  5. Return essential data
         return Results.Ok(new TokenVerifyResponse()
         {

@@ -12,7 +12,7 @@ using neo.preregist.Data.Enterprise;
 namespace neo.preregist.Migrations.Enterprise
 {
     [DbContext(typeof(EnterpriseDbContext))]
-    [Migration("20250717070035_InitEnterprisePreRegistSchema")]
+    [Migration("20250718133907_InitEnterprisePreRegistSchema")]
     partial class InitEnterprisePreRegistSchema
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace neo.preregist.Migrations.Enterprise
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("neo.preregist.Data.Enterprise.Entities.PreRegist", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.PreRegist", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,17 +39,14 @@ namespace neo.preregist.Migrations.Enterprise
                         .HasColumnName("created_at");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
-                    b.Property<bool>("IsRegisteredDesktop")
+                    b.Property<bool>("IsRegistered")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_registered_desktop");
-
-                    b.Property<bool>("IsRegisteredWeb")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_registered_web");
+                        .HasColumnName("is_registered");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -67,19 +64,10 @@ namespace neo.preregist.Migrations.Enterprise
                         .HasColumnName("otp_expired_at");
 
                     b.Property<string>("Phone")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
-
-                    b.Property<short>("PreferredContact")
-                        .HasMaxLength(1)
-                        .HasColumnType("smallint")
-                        .HasColumnName("preferred_contact");
-
-                    b.Property<short>("ProductType")
-                        .HasMaxLength(1)
-                        .HasColumnType("smallint")
-                        .HasColumnName("product_type");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

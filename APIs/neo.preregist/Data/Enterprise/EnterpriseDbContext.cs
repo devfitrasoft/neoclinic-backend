@@ -18,12 +18,6 @@ namespace neo.preregist.Data.Enterprise
             {
                 e.Property(x => x.Id)
                  .UseIdentityByDefaultColumn();              // auto‑increment (bigserial)
-
-                e.Property(x => x.PreferredContact)
-                 .HasColumnType("smallint");
-
-                e.Property(x => x.ProductType)
-                 .HasColumnType("smallint");
             });
         }
     }

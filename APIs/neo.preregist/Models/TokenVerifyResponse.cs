@@ -10,11 +10,10 @@ namespace neo.preregist.Models
     }
 
     public sealed record PreRegistData(
-        string? name,
-        string? email,
-        string? phone,
+        string name,
+        string email,
+        string phone,
         DateTime? otpExpiresAt,
-        bool isRegisteredWeb,
-        bool isRegisteredDesktop
-        );
+        bool isRegistered
+    );
 }

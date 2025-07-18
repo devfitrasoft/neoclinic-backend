@@ -8,16 +8,10 @@ namespace neo.preregist.Models
         [JsonPropertyName("name"), Required]
         public string Name { get; set; } = null!;
 
-        [JsonPropertyName("preferred_comm"), Required]
-        public int PrefComm { get; set; }
-
-        [JsonPropertyName("email")]
+        [JsonPropertyName("email"), Required]
         public string Email { get; set; } = null!;
 
-        [JsonPropertyName("phone")]
+        [JsonPropertyName("phone"), Required]
         public string Phone { get; set; } = null!;
-
-        [JsonPropertyName("product"), Required]
-        public int ProductType { get; set; }
     }
 }

@@ -12,7 +12,7 @@ using neo.admin.Data.FaskesObj;
 namespace neo.admin.Migrations.Faskes
 {
     [DbContext(typeof(FaskesDbContext))]
-    [Migration("20250713144254_InitFaskesSchema")]
+    [Migration("20250718135918_InitFaskesSchema")]
     partial class InitFaskesSchema
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace neo.admin.Migrations.Faskes
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Auth", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Auth", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -114,7 +114,7 @@ namespace neo.admin.Migrations.Faskes
                     b.ToTable("sys_auth");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Group", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Group", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -175,7 +175,7 @@ namespace neo.admin.Migrations.Faskes
                     b.ToTable("sys_group");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Menu", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Menu", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -244,7 +244,7 @@ namespace neo.admin.Migrations.Faskes
                     b.ToTable("sys_menu");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Module", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Module", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -297,7 +297,7 @@ namespace neo.admin.Migrations.Faskes
                     b.ToTable("sys_module");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Role", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -344,7 +344,7 @@ namespace neo.admin.Migrations.Faskes
                     b.ToTable("sys_role");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.User", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.User", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -438,7 +438,7 @@ namespace neo.admin.Migrations.Faskes
                     b.ToTable("sys_user");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.UserFaskes", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.UserFaskes", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -484,30 +484,30 @@ namespace neo.admin.Migrations.Faskes
                     b.ToTable("sys_user_faskes");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Auth", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Auth", b =>
                 {
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Group", "Group")
+                    b.HasOne("Shared.Entities.FaskesObj.Group", "Group")
                         .WithMany()
                         .HasForeignKey("GroupCode")
                         .HasPrincipalKey("Code")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Menu", "Menu")
+                    b.HasOne("Shared.Entities.FaskesObj.Menu", "Menu")
                         .WithMany()
                         .HasForeignKey("MenuCode")
                         .HasPrincipalKey("Code")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Module", "Module")
+                    b.HasOne("Shared.Entities.FaskesObj.Module", "Module")
                         .WithMany()
                         .HasForeignKey("ModuleCode")
                         .HasPrincipalKey("Code")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Role", "Role")
+                    b.HasOne("Shared.Entities.FaskesObj.Role", "Role")
                         .WithMany("Auths")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -522,9 +522,9 @@ namespace neo.admin.Migrations.Faskes
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Group", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Group", b =>
                 {
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Module", "Module")
+                    b.HasOne("Shared.Entities.FaskesObj.Module", "Module")
                         .WithMany()
                         .HasForeignKey("ModuleCode")
                         .HasPrincipalKey("Code")
@@ -534,16 +534,16 @@ namespace neo.admin.Migrations.Faskes
                     b.Navigation("Module");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Menu", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Menu", b =>
                 {
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Group", "Group")
+                    b.HasOne("Shared.Entities.FaskesObj.Group", "Group")
                         .WithMany()
                         .HasForeignKey("GroupCode")
                         .HasPrincipalKey("Code")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Module", "Module")
+                    b.HasOne("Shared.Entities.FaskesObj.Module", "Module")
                         .WithMany()
                         .HasForeignKey("ModuleCode")
                         .HasPrincipalKey("Code")
@@ -555,9 +555,9 @@ namespace neo.admin.Migrations.Faskes
                     b.Navigation("Module");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.User", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.User", b =>
                 {
-                    b.HasOne("neo.admin.Data.FaskesObj.Entities.Role", "Role")
+                    b.HasOne("Shared.Entities.FaskesObj.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -566,7 +566,7 @@ namespace neo.admin.Migrations.Faskes
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.FaskesObj.Entities.Role", b =>
+            modelBuilder.Entity("Shared.Entities.FaskesObj.Role", b =>
                 {
                     b.Navigation("Auths");
                 });

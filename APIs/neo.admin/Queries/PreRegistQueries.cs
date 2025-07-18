@@ -15,25 +15,23 @@ namespace neo.admin.Queries
             _logger = logger;
         }
 
-        public async Task UpdateIsRegisteredWebFlagAsync(string? regEmail, string? regPhone, CancellationToken ct)
+        public async Task UpdatePreRegisteredFlagAsync(string regEmail, string regPhone, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(regEmail) && string.IsNullOrWhiteSpace(regPhone))
             {
-                _logger.LogError("UpdateIsRegisteredWebFlagAsync: At least one of parameters must be filled");
+                _logger.LogError("UpdatePreRegisteredFlagAsync: At least one of parameters must be filled");
                 return;
             }
 
-            var row = string.IsNullOrWhiteSpace(regEmail) 
-                ? await _edb.PreRegists.FirstOrDefaultAsync(r => r.Email.Contains(regEmail.Trim()), ct)
-                : await _edb.PreRegists.FirstOrDefaultAsync(r => r.Phone.Contains(regPhone.Trim()), ct);
+            var row = await _edb.PreRegists.FirstOrDefaultAsync(r => r.Email.Contains(regEmail.Trim(), StringComparison.OrdinalIgnoreCase) && r.Phone.Contains(regPhone.Trim()), ct);
 
             if(row == null)
             {
-                _logger.LogError("UpdateIsRegisteredWebFlagAsync: An entry could not be found for these particular parameter");
+                _logger.LogError("UpdatePreRegisteredFlagAsync: An entry could not be found for these particular parameter");
                 return;
             }
 
-            row.IsRegisteredWeb = true;
+            row.IsRegistered = true;
             row.UpdatedAt = DateTime.UtcNow;
 
             await _edb.SaveChangesAsync(ct);

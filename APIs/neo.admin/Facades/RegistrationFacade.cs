@@ -117,7 +117,7 @@ namespace neo.admin.Facades
             await _cstrQry.GenerateByLoginIdIfMissing(login.Id, faskes.Id, ct);
 
             /* 5. update is_registered_web_flag in db_neoclinic pre_regist for registered email or phone or both */
-            await _preRegistQry.UpdateIsRegisteredWebFlagAsync(faskes.Email, faskes.Phone, ct);
+            await _preRegistQry.UpdatePreRegisteredFlagAsync(faskes.Email, faskes.Phone, ct);
 
             /* 6. send SU invite mail */
             await _mail.SendInviteAsync(faskes.Email, faskes.Id, login.Id, login.Username);

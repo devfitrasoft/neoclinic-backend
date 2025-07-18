@@ -1,5 +1,4 @@
-﻿using neo.admin.Common;
-using neo.preregist.Common;
+﻿using neo.preregist.Common;
 using Shared.Mailing;
 
 namespace neo.preregist.Services
@@ -15,68 +14,23 @@ namespace neo.preregist.Services
             _email = email;
         }
 
-        public async Task SendNotifAsync(string toEmail, ProductTypes product, string otp)
+        public async Task SendNotifAsync(string toEmail, string otp)
         {
-            if (product == ProductTypes.Web || product == ProductTypes.Desktop)
-            {
-                var header = determineHeader(product);
-                var html = generateBody(product, otp);
+            var header = LocalConstants.MAIL_REGIST_TOKEN_HEADER;
 
-                await _email.SendAsync(toEmail,
-                    header,
-                    html);
-            }
-            else if(product == ProductTypes.Both)
-            {
-                var header = determineHeader(ProductTypes.Web);
-                var html = generateBody(ProductTypes.Web, otp);
+            var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={otp}";
+            var otpExpiry = _cfg["PreRegistToken:Expiry"] ?? LocalConstants.OTP_EXPIRY_IN_MINUTE;
 
-                await _email.SendAsync(toEmail,
-                    header,
-                    html);
+            var html = TemplateRenderer.Render("""
+            <p>Terimakasih sudah memilih produk web dari aplikasi Neoclinic!</p>
+            <p>Anda dapat melakukan registrasi faskes dengan meng-klik <a href="{{ link }}" target="_blank">link</a> berikut ini.</p>
+            <br/>
+            <p>Link registrasi hanya dapat berlaku selama {{ otpExpiry }} menit.</p>
+            """, new { link, otpExpiry });
 
-                header = determineHeader(ProductTypes.Desktop);
-                html = generateBody(ProductTypes.Desktop, otp);
-
-                await _email.SendAsync(toEmail,
-                    header,
-                    html);
-            }
-        }
-
-        private string determineHeader(ProductTypes product)
-            => product == ProductTypes.Web
-            ? "Pemberitahuan Link Token Registrasi NeoClinic - Web"
-            : product == ProductTypes.Desktop
-                ? "Pemberitahuan Pra-Registrasi Neoclinic - Desktop"
-                : "Pemberitahuan Pra-Registrasi Neoclinic";
-
-        private string generateBody(ProductTypes product, string? otp)
-        {
-            var body = string.Empty;
-
-            if(product == ProductTypes.Web)
-            {
-                var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={otp}";
-                var otpExpiry = _cfg["PreRegistToken:Expiry"] ?? LocalConstants.OTP_EXPIRY_IN_MINUTE;
-
-                body = TemplateRenderer.Render("""
-                <p>Terimakasih sudah memilih produk web dari aplikasi Neoclinic!</p>
-                <p>Anda dapat melakukan registrasi faskes dengan meng-klik <a href="{{ link }}" target="_blank">link</a> berikut ini.</p>
-                <br/>
-                <p>Link registrasi hanya dapat berlaku selama {{ otpExpiry }} menit.</p>
-                """, new { link, otpExpiry });
-            }
-            else if(product == ProductTypes.Desktop)
-            {
-                body = TemplateRenderer.Render("""
-                <h2>Selamat datang di NeoClinic!</h2>
-                <p>Terimakasih sudah memilih produk desktop dari aplikasi Neoclinic!</p>
-                <p>Anda akan dihubungi lebih lanjut oleh admin melalui email/whatsapp yang telah anda cantumkan sebelumnya.</p>
-                """, new { });
-            }
-
-            return body;
+            await _email.SendAsync(toEmail,
+                header,
+                html);
         }
     }
 }
