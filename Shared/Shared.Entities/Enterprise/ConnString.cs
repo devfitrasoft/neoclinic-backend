@@ -1,8 +1,7 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace neo.admin.Data.Enterprise.Entities
+namespace Shared.Entities.Enterprise
 {
     /// <summary>Maps to <b>sys_connstring</b> in db_neoclinic.</summary>
     [Table("sys_connstring")]

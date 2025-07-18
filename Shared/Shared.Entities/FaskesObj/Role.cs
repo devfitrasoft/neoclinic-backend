@@ -1,21 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace neo.admin.Data.FaskesObj.Entities
+namespace Shared.Entities.FaskesObj
 {
-    /// <summary>Maps to <b>sys_group</b> in db_neoclinic_{noFaskes}.</summary>
-    [Table("sys_group")]
-    public class Group
+    /// <summary>Maps to <b>sys_role</b> in db_neoclinic_{noFaskes}.</summary>
+    [Table("sys_role")]
+    public class Role
     {
         [Key, Column("id")] public int Id { get; set; }
         
-        [Required, MaxLength(2), Column("module_code")] 
-        public string ModuleCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_module
-        public Module Module { get; set; } = null!;
-        
-        [Required, MaxLength(2), Column("code")] 
-        public string Code { get; set; } = null!;
-
         [Required, MaxLength(50), Column("name")] 
         public string Name { get; set; } = null!;
 
@@ -27,5 +20,7 @@ namespace neo.admin.Data.FaskesObj.Entities
 
         [Column("updated_at")] public DateTime? UpdatedAt { get; set; }
         [Column("updater_id")] public long? UpdaterId { get; set; }
+
+        public ICollection<Auth> Auths { get; set; } = new List<Auth>();    // collection of authorizations a role has
     }
 }

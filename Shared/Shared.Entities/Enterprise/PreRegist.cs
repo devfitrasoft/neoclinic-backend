@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace neo.preregist.Data.Enterprise.Entities
+namespace Shared.Entities.Enterprise
 {
     /// <summary>Maps to <b>pre_regist</b> in db_neoclinic.</summary>
     [Table("pre_regist")]

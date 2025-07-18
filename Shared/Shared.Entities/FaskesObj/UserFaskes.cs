@@ -1,8 +1,8 @@
-﻿using neo.admin.Data.Enterprise.Entities;
+﻿using Shared.Entities.Enterprise;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace neo.admin.Data.FaskesObj.Entities
+namespace Shared.Entities.FaskesObj
 {
     /// <summary>Maps to <b>sys_user_faskes</b> in db_neoclinic_{noFaskes}.</summary>
     [Table("sys_user_faskes")]

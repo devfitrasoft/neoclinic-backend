@@ -61,7 +61,7 @@ namespace neo.preregist.Services
                 var otpExpiry = _cfg["PreRegistToken:Expiry"] ?? LocalConstants.OTP_EXPIRY_IN_MINUTE;
 
                 body = TemplateRenderer.Render("""
-                <p>Terimakasih sudah memilih produk Desktop dari aplikasi Neoclinic!</p>
+                <p>Terimakasih sudah memilih produk web dari aplikasi Neoclinic!</p>
                 <p>Anda dapat melakukan registrasi faskes dengan meng-klik <a href="{{ link }}" target="_blank">link</a> berikut ini.</p>
                 <br/>
                 <p>Link registrasi hanya dapat berlaku selama {{ otpExpiry }} menit.</p>
@@ -71,7 +71,7 @@ namespace neo.preregist.Services
             {
                 body = TemplateRenderer.Render("""
                 <h2>Selamat datang di NeoClinic!</h2>
-                <p>Terimakasih sudah memilih produk Desktop dari aplikasi Neoclinic!</p>
+                <p>Terimakasih sudah memilih produk desktop dari aplikasi Neoclinic!</p>
                 <p>Anda akan dihubungi lebih lanjut oleh admin melalui email/whatsapp yang telah anda cantumkan sebelumnya.</p>
                 """, new { });
             }

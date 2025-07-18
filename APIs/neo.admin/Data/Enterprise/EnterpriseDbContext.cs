@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using neo.admin.Data.Enterprise.Entities;
+using Shared.Entities.Enterprise;
 
 namespace neo.admin.Data.Enterprise
 {
@@ -11,6 +11,7 @@ namespace neo.admin.Data.Enterprise
         public DbSet<Faskes> Faskeses => Set<Faskes>();   // EF pluralises badly, explicit set
         public DbSet<Login> Logins => Set<Login>();
         public DbSet<ConnString> ConnStrings => Set<ConnString>();
+        public DbSet<PreRegist> PreRegists => Set<PreRegist>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
-using neo.admin.Data.Enterprise.Entities;
 using neo.admin.Models;
+using Shared.Entities.Enterprise;
 
 namespace neo.admin.Queries
 {
@@ -16,7 +16,7 @@ namespace neo.admin.Queries
                .Select(c => new CorporateLookupItem(c.Id, c.Name))
                .ToListAsync(ct);
 
-        public async Task<Corporate?> GetById(long id, CancellationToken ct) =>
+        public async Task<Corporate?> GetByIdAsync(long id, CancellationToken ct) =>
             await _db.Corporates.FindAsync([id], ct);
 
         public async Task<Corporate> CreateCorporateIfMissing(string name, CancellationToken ct)

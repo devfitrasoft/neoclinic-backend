@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using neo.preregist.Data.Enterprise.Entities;
+using Shared.Entities.Enterprise;
 
 namespace neo.preregist.Data.Enterprise
 {

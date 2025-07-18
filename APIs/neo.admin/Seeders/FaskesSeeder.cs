@@ -1,8 +1,8 @@
 ﻿using neo.admin.Data.FaskesObj;
-using neo.admin.Data.FaskesObj.Entities;
 using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
 using Shared.Common;
+using Shared.Entities.FaskesObj;
 
 namespace neo.admin.Seeders
 {

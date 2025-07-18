@@ -1,6 +1,6 @@
 ﻿// APIs/neo.admin/Data/Clinic/FaskesDbContext.cs
 using Microsoft.EntityFrameworkCore;
-using neo.admin.Data.FaskesObj.Entities;
+using Shared.Entities.FaskesObj;
 
 namespace neo.admin.Data.FaskesObj;
 

@@ -72,10 +72,20 @@ app.UseCors();   // uses the default policy above
 
 /* 1. GET faskes by nomor */
 app.MapGet("/faskes/search/{noFaskes}",
-    async (string noFaskes, FaskesQueries q, CancellationToken ct) =>
-        await q.GetAsync(noFaskes, ct) is { } info
-            ? Results.Ok(info)
-            : Results.NoContent());
+    async (string noFaskes, FaskesQueries q, CancellationToken ct) => {
+        var faskes = await q.GetAsync(noFaskes, ct);
+
+        if(faskes == null)
+            return Results.NoContent();
+
+        var info = new FaskesInfoResponse(
+            faskes.Id, faskes.Name, faskes.Email, faskes.Phone,
+            faskes.EmailBill, faskes.PhoneBill, faskes.EmailTech, faskes.PhoneTech,
+            faskes.Address, faskes.IsActive, faskes.CorporateId, faskes.Name
+        );
+        
+        return Results.Ok(info);
+});
 
 /* 2. GET corporations search */
 app.MapGet("/corporates",

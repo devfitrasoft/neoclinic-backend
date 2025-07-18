@@ -1,13 +1,11 @@
 ﻿using neo.admin.Common;
 using neo.preregist.Common;
 using neo.preregist.Data.Enterprise;
-using neo.preregist.Data.Enterprise.Entities;
 using neo.preregist.Models;
 using neo.preregist.Queries;
 using neo.preregist.Services;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml.Linq;
 
 namespace neo.preregist.Facades
 {

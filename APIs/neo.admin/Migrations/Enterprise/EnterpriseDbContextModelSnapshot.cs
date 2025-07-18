@@ -22,7 +22,7 @@ namespace neo.admin.Migrations.Enterprise
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.ConnString", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.ConnString", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,7 +90,7 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_connstring");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Corporate", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.Corporate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -137,7 +137,7 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_corporate");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Faskes", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.Faskes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,7 +259,7 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_faskes");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Login", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.Login", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -338,9 +338,74 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_login");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.ConnString", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.PreRegist", b =>
                 {
-                    b.HasOne("neo.admin.Data.Enterprise.Entities.Login", "Login")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
+
+                    b.Property<bool>("IsRegisteredDesktop")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_registered_desktop");
+
+                    b.Property<bool>("IsRegisteredWeb")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_registered_web");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Otp")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("otp");
+
+                    b.Property<DateTime?>("OtpExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("otp_expired_at");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<int>("PreferredContact")
+                        .HasMaxLength(1)
+                        .HasColumnType("integer")
+                        .HasColumnName("preferred_contact");
+
+                    b.Property<int>("ProductType")
+                        .HasMaxLength(1)
+                        .HasColumnType("integer")
+                        .HasColumnName("product_type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("pre_regist");
+                });
+
+            modelBuilder.Entity("Shared.Entities.Enterprise.ConnString", b =>
+                {
+                    b.HasOne("Shared.Entities.Enterprise.Login", "Login")
                         .WithMany()
                         .HasForeignKey("LoginId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -349,9 +414,9 @@ namespace neo.admin.Migrations.Enterprise
                     b.Navigation("Login");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Faskes", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.Faskes", b =>
                 {
-                    b.HasOne("neo.admin.Data.Enterprise.Entities.Corporate", "Corporate")
+                    b.HasOne("Shared.Entities.Enterprise.Corporate", "Corporate")
                         .WithMany("Faskes")
                         .HasForeignKey("CorporateId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -359,14 +424,14 @@ namespace neo.admin.Migrations.Enterprise
                     b.Navigation("Corporate");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Login", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.Login", b =>
                 {
-                    b.HasOne("neo.admin.Data.Enterprise.Entities.Corporate", "Corporate")
+                    b.HasOne("Shared.Entities.Enterprise.Corporate", "Corporate")
                         .WithMany()
                         .HasForeignKey("CorporateId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("neo.admin.Data.Enterprise.Entities.Faskes", "Faskes")
+                    b.HasOne("Shared.Entities.Enterprise.Faskes", "Faskes")
                         .WithMany("Logins")
                         .HasForeignKey("FaskesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -377,12 +442,12 @@ namespace neo.admin.Migrations.Enterprise
                     b.Navigation("Faskes");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Corporate", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.Corporate", b =>
                 {
                     b.Navigation("Faskes");
                 });
 
-            modelBuilder.Entity("neo.admin.Data.Enterprise.Entities.Faskes", b =>
+            modelBuilder.Entity("Shared.Entities.Enterprise.Faskes", b =>
                 {
                     b.Navigation("Logins");
                 });

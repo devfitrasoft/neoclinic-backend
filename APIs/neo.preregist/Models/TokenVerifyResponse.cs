@@ -1,5 +1,4 @@
-﻿using neo.preregist.Data.Enterprise.Entities;
-using Shared.Common.Models;
+﻿using Shared.Common.Models;
 using System.Text.Json.Serialization;
 
 namespace neo.preregist.Models

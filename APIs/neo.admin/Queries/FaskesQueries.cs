@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
-using neo.admin.Data.Enterprise.Entities;
 using neo.admin.Models;
+using Shared.Entities.Enterprise;
 
 namespace neo.admin.Queries
 {
@@ -10,16 +10,8 @@ namespace neo.admin.Queries
         private readonly EnterpriseDbContext _db;
         public FaskesQueries(EnterpriseDbContext db) => _db = db;
 
-        public Task<FaskesInfoResponse?> GetAsync(string noFaskes, CancellationToken ct) =>
-            _db.Faskeses
-               .Where(f => f.NoFaskes == noFaskes)
-               .Select(f => new FaskesInfoResponse(
-                    f.Id, f.Name, f.Email, f.Phone,
-                    f.EmailBill, f.PhoneBill,
-                    f.EmailTech, f.PhoneTech,
-                    f.Address, f.IsActive, f.CorporateId,
-                    f.Corporate != null ? f.Corporate.Name : null))
-               .FirstOrDefaultAsync(ct);
+        public Task<Faskes?> GetAsync(string noFaskes, CancellationToken ct) =>
+            _db.Faskeses.FirstOrDefaultAsync(f => f.NoFaskes == noFaskes, ct);
 
         public async Task<Faskes> CreateNewFaskes(RegisterFaskesRequest req, Corporate? corp, CancellationToken ct)
         {

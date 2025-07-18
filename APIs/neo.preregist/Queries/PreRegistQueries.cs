@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using neo.admin.Common;
 using neo.preregist.Data.Enterprise;
-using neo.preregist.Data.Enterprise.Entities;
 using neo.preregist.Models;
-using Org.BouncyCastle.Ocsp;
+using Shared.Entities.Enterprise;
 
 namespace neo.preregist.Queries
 {

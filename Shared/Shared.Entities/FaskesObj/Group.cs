@@ -1,18 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace neo.admin.Data.FaskesObj.Entities
+namespace Shared.Entities.FaskesObj
 {
-    /// <summary>Maps to <b>sys_module</b> in db_neoclinic_{noFaskes}.</summary>
-    [Table("sys_module")]
-    public class Module
+    /// <summary>Maps to <b>sys_group</b> in db_neoclinic_{noFaskes}.</summary>
+    [Table("sys_group")]
+    public class Group
     {
         [Key, Column("id")] public int Id { get; set; }
-
-        [Required, MaxLength(2), Column("code")]
+        
+        [Required, MaxLength(2), Column("module_code")] 
+        public string ModuleCode { get; set; } = null!; // FK to db_neoclinic_{noFaskes}.sys_module
+        public Module Module { get; set; } = null!;
+        
+        [Required, MaxLength(2), Column("code")] 
         public string Code { get; set; } = null!;
 
-        [Required, MaxLength(50), Column("name")]
+        [Required, MaxLength(50), Column("name")] 
         public string Name { get; set; } = null!;
 
         [Column("is_active")] public bool? IsActive { get; set; }
