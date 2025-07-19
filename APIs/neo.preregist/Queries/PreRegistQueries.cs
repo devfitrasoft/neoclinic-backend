@@ -35,8 +35,10 @@ namespace neo.preregist.Queries
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task UpdateOtpAsync(PreRegist row, string hashedOtp, DateTime expiry, CancellationToken ct)
+        public async Task UpdateInfoAndOtpAsync(PreRegist row, string hashedOtp, DateTime expiry, PreRegistRequest req, CancellationToken ct)
         {
+            row.Name = req.Name;
+            row.Phone = req.Phone;
             row.Otp = hashedOtp;
             row.OtpExpiresAt = expiry;
             row.UpdatedAt = DateTime.UtcNow;

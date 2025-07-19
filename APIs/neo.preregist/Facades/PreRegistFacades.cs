@@ -51,7 +51,7 @@ namespace neo.preregist.Facades
                     else
                     {
                         OtpAndExpiry = DoGenerateHashedOtp();
-                        await _query.UpdateOtpAsync(row, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
+                        await _query.UpdateInfoAndOtpAsync(row, OtpAndExpiry.Item1, OtpAndExpiry.Item2, req, ct);
                         await _mail.SendNotifAsync(req.Email, OtpAndExpiry.Item1);
 
                         response = GenerateResponse(PreRegistSaveResponse.Updated, true, "Updated", row.IsRegistered);
