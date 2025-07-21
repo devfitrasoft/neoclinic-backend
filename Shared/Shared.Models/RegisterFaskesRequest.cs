@@ -29,16 +29,16 @@ namespace Shared.Models
         [JsonPropertyName("phone"), Required]
         public string Phone { get; init; } = null!;
 
-        [JsonPropertyName("email_bill")]
+        [JsonPropertyName("emailBill")]
         public string EmailBill { get; init; } = null!;
 
-        [JsonPropertyName("phone_bill")]
+        [JsonPropertyName("phoneBill")]
         public string PhoneBill { get; init; } = null!;
 
-        [JsonPropertyName("email_tech")]
+        [JsonPropertyName("emailTech")]
         public string EmailTech { get; init; } = null!;
 
-        [JsonPropertyName("phone_tech")]
+        [JsonPropertyName("phoneTech")]
         public string PhoneTech { get; init; } = null!;
 
         [JsonPropertyName("captcha"), Required]
