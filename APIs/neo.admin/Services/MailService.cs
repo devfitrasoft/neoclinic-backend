@@ -17,14 +17,15 @@ namespace neo.admin.Services
             _regSettings = regSettings.Value;
         }
 
-        public Task SendInviteAsync(string toEmail, long faskesId, long loginId, string loginUsername)
+        public Task SendInviteAsync(string toEmail, string loginUsername, Tuple<string,DateTime> token)
         {
-            var link = $"{_cfg["App:RegisterWebUrl"]}/setup-su?f={faskesId}&u={loginId}";
+            var link = $"{_cfg["App:RegisterWebUrl"]}/reset-password?token={token.Item1}";
+            var safeUsername = loginUsername.Replace(".", "&#8203;.");
             var html = TemplateRenderer.Render("""
             <h2>Selamat datang di NeoClinic</h2>
-            <p>Akun Super User Anda (<b>{loginUsername}</b>) hampir siap. Klik tautan di bawah untuk membuat kata sandi:</p>
+            <p>Akun Super User Anda (<b>{{ loginUsername }}</b>) hampir siap. Klik tautan di bawah untuk membuat kata sandi:</p>
             <p><a href="{{ link }}">Setel Kata Sandi</a></p>
-            """, new { loginUsername, link });
+            """, new { loginUsername = safeUsername, link });
 
             return _email.SendAsync(toEmail,
                 "Aktivasi akun NeoClinic",

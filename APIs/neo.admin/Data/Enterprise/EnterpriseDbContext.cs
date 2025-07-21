@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shared.Entities.Enterprise;
+using Shared.Entities.Objs.Enterprise;
+using Shared.Entities.Queries;
 
 namespace neo.admin.Data.Enterprise
 {
-    public class EnterpriseDbContext : DbContext
+    public class EnterpriseDbContext : DbContext, IEnterpriseDbContext, IPreRegistDbContext, IOtpTokenDbContext
     {
         public EnterpriseDbContext(DbContextOptions<EnterpriseDbContext> options) : base(options) { }
 
@@ -12,6 +13,8 @@ namespace neo.admin.Data.Enterprise
         public DbSet<Login> Logins => Set<Login>();
         public DbSet<ConnString> ConnStrings => Set<ConnString>();
         public DbSet<PreRegist> PreRegists => Set<PreRegist>();
+        public DbSet<OtpToken> OtpTokens => Set<OtpToken>();
+        public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {

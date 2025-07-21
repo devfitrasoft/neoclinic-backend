@@ -22,7 +22,39 @@ namespace neo.admin.Migrations.Enterprise
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.ConnString", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.AuthSession", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired_at");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("issued_at");
+
+                    b.Property<long>("LoginId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("login_id");
+
+                    b.Property<string>("RefreshTokenHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("refresh_token_hash");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("sys_auth_session");
+                });
+
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.ConnString", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,7 +122,7 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_connstring");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.Corporate", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Corporate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -137,7 +169,7 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_corporate");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.Faskes", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Faskes", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,7 +291,7 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_faskes");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.Login", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Login", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -338,7 +370,51 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_login");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.PreRegist", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.OtpToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired_at");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_used");
+
+                    b.Property<long>("TargetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("target_id");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("sys_otp");
+                });
+
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.PreRegist", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -367,15 +443,6 @@ namespace neo.admin.Migrations.Enterprise
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<string>("Otp")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("otp");
-
-                    b.Property<DateTime?>("OtpExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("otp_expired_at");
-
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -391,9 +458,9 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("pre_regist");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.ConnString", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.ConnString", b =>
                 {
-                    b.HasOne("Shared.Entities.Enterprise.Login", "Login")
+                    b.HasOne("Shared.Entities.Objs.Enterprise.Login", "Login")
                         .WithMany()
                         .HasForeignKey("LoginId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -402,9 +469,9 @@ namespace neo.admin.Migrations.Enterprise
                     b.Navigation("Login");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.Faskes", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Faskes", b =>
                 {
-                    b.HasOne("Shared.Entities.Enterprise.Corporate", "Corporate")
+                    b.HasOne("Shared.Entities.Objs.Enterprise.Corporate", "Corporate")
                         .WithMany("Faskes")
                         .HasForeignKey("CorporateId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -412,14 +479,14 @@ namespace neo.admin.Migrations.Enterprise
                     b.Navigation("Corporate");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.Login", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Login", b =>
                 {
-                    b.HasOne("Shared.Entities.Enterprise.Corporate", "Corporate")
+                    b.HasOne("Shared.Entities.Objs.Enterprise.Corporate", "Corporate")
                         .WithMany()
                         .HasForeignKey("CorporateId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Shared.Entities.Enterprise.Faskes", "Faskes")
+                    b.HasOne("Shared.Entities.Objs.Enterprise.Faskes", "Faskes")
                         .WithMany("Logins")
                         .HasForeignKey("FaskesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -430,12 +497,12 @@ namespace neo.admin.Migrations.Enterprise
                     b.Navigation("Faskes");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.Corporate", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Corporate", b =>
                 {
                     b.Navigation("Faskes");
                 });
 
-            modelBuilder.Entity("Shared.Entities.Enterprise.Faskes", b =>
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Faskes", b =>
                 {
                     b.Navigation("Logins");
                 });

@@ -30,6 +30,7 @@
     <ProjectReference Include="..\..\Shared\Shared.Entities\Shared.Entities.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.Logging\Shared.Logging.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.Mailing\Shared.Mailing.csproj" />
+    <ProjectReference Include="..\..\Shared\Shared.Models\Shared.Models.csproj" />
   </ItemGroup>
 
 </Project>

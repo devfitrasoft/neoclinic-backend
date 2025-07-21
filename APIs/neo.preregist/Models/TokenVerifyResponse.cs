@@ -1,4 +1,4 @@
-﻿using Shared.Common.Models;
+﻿using Shared.Models;
 using System.Text.Json.Serialization;
 
 namespace neo.preregist.Models

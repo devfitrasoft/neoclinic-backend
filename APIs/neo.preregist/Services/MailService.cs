@@ -1,4 +1,5 @@
 ﻿using neo.preregist.Common;
+using Shared.Common;
 using Shared.Mailing;
 
 namespace neo.preregist.Services
@@ -19,13 +20,13 @@ namespace neo.preregist.Services
             var header = LocalConstants.MAIL_REGIST_TOKEN_HEADER;
 
             var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={otp}";
-            var otpExpiry = _cfg["PreRegistToken:Expiry"] ?? LocalConstants.OTP_EXPIRY_IN_MINUTE;
+            var otpExpiry = _cfg["OtpToken:Expiry"] ?? Constants.OTP_EXPIRY_IN_MINUTE;
 
             var html = TemplateRenderer.Render("""
-            <p>Terimakasih sudah memilih produk web dari aplikasi Neoclinic!</p>
-            <p>Anda dapat melakukan registrasi faskes dengan meng-klik <a href="{{ link }}" target="_blank">link</a> berikut ini.</p>
+            <p>Terimakasih telah memilih NeoClinic!</p>
+            <p>Silakan klik <a href="{{ link }}" target="_blank">link</a> untuk melengkapi data faskes Anda.</p>
             <br/>
-            <p>Link registrasi hanya dapat berlaku selama {{ otpExpiry }} menit.</p>
+            <p>Link hanya berlaku untuk {{ otpExpiry }} menit.</p>
             """, new { link, otpExpiry });
 
             await _email.SendAsync(toEmail,

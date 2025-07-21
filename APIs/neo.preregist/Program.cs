@@ -1,14 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using neo.preregist.Common;
 using neo.preregist.Data.Enterprise;
 using neo.preregist.Facades;
 using neo.preregist.Models;
 using neo.preregist.Services;
 using Shared.Common;
-using Shared.Mailing;
 using Shared.EFCore;
+using Shared.Entities.Queries;
+using Shared.Entities.Queries.Enterprise;
 using Shared.Logging;
+using Shared.Mailing;
+using Shared.Models;
 using System.ComponentModel.DataAnnotations;
-using neo.preregist.Common;
 
 var b = WebApplication.CreateBuilder(args);
 
@@ -20,11 +23,21 @@ b.Host.UseSerilogLogging(b.Configuration);
 if (b.Configuration.GetValue("Logging:EnableFileSink", true))
     b.Services.AddHostedService<LogMaintenanceWorker>();  // register background compressor
 
+/*  Load DBContexts */
+// Register the DbContext
 b.Services.AddDbContext<EnterpriseDbContext>(o =>
     o.UseNpgsql(b.Configuration.GetConnectionString("EnterpriseDB")));
 
+// Register each interface mapping to the same instance
+b.Services.AddScoped<IPreRegistDbContext>(sp => sp.GetRequiredService<EnterpriseDbContext>());
+b.Services.AddScoped<IOtpTokenDbContext>(sp => sp.GetRequiredService<EnterpriseDbContext>());
+
+/* Register queries that depend on those interfaces */
+b.Services.AddScoped<PreRegistQueries>();
+b.Services.AddScoped<OtpTokenQueries>();
+
 /* ------------ automatic migration ------------ */
-b.Services.AddEfAutoMigration<EnterpriseDbContext>("pre_regist");
+b.Services.AddEfAutoMigration<EnterpriseDbContext>("pre_regist", "sys_otp");
 /* --------------------------------------------- */
 
 /*  Load base libraries */
