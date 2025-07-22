@@ -8,7 +8,7 @@ namespace Shared.Entities.Objs.Enterprise
     /// Deleted periodically each days.
     /// </summary>
     [Table("sys_otp")]
-    public sealed class OtpToken
+    public class OtpToken
     {
         [Key, Column("id")] public long Id { get; set; }
         [Required, Column("target_id")] public long TargetId { get; set; } // ID of PreRegist or Login, depending on Type

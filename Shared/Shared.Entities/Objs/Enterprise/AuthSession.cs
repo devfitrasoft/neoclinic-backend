@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Shared.Entities.Objs.Enterprise
 {
     /// <summary>
-    /// Maps to <b>sys_otp</b> in db_neoclinic.
+    /// Maps to <b>sys_auth_session</b> in db_neoclinic.
     /// Deleted periodically each days. (Reset user session)
     /// </summary>
     [Table("sys_auth_session")]
