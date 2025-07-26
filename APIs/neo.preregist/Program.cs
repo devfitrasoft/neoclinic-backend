@@ -77,15 +77,17 @@ app.MapPost("/pre-register",
         var context = new ValidationContext(req);
 
         if (!Validator.TryValidateObject(req, context, validationResults, validateAllProperties: true))
-        {
-            return Results.BadRequest(validationResults);
-        }
+            return Results.Json(new TokenVerifyResponse()
+            {
+                Success = false,
+                Message = StringParser.ValidationErrorMessageBuilder(validationResults)
+            }, statusCode: StatusCodes.Status400BadRequest);
 
         var res = await facade.SaveAndNotify(req, ct);
 
-        if (res != null)
+        if (res.Data.FirstOrDefault() != null)
         {
-            return res.Data.status switch
+            return res.Data.FirstOrDefault()?.status switch
             {
                 PreRegistSaveResponse.Created => Results.Created("/pre-register", res),
                 PreRegistSaveResponse.Updated => Results.Ok(res),
@@ -106,24 +108,33 @@ app.MapGet("pre-register/verify",
         var row = await facade.GetRowByTokenAsync(token, ct);
 
         if (row == null)
-        {
-            return Results.Unauthorized(); // Token not found
-        }
+            return Results.Json(new TokenVerifyResponse()
+            {
+                Success = false,
+                Message = "Token unauthorized"
+            }, statusCode: StatusCodes.Status401Unauthorized); // Token expired
 
         //  3. Check if token is expired
         if (!row.otpExpiresAt.HasValue || row.otpExpiresAt.Value < DateTime.UtcNow)
-        {
-            return Results.Unauthorized(); // Token expired
-        }
+            return Results.Json(new TokenVerifyResponse()
+            {
+                Success = false,
+                Message = "Token unauthorized"
+            }, statusCode: StatusCodes.Status401Unauthorized); // Token expired
 
         //  4. Check if is_registered_web = true
         if(row.isRegistered)
-            return Results.Conflict(); // Account already registered, henche conflict
+            return Results.Json(new TokenVerifyResponse()
+            {
+                Success = false,
+                Message = "Data already registered into the system"
+            }, statusCode: StatusCodes.Status409Conflict); // Account already registered, henche conflict
+
         //  5. Return essential data
         return Results.Ok(new TokenVerifyResponse()
         {
             Success = true,
-            Data = row
+            Data = new List<PreRegistData>() { row },
         });
     });
 

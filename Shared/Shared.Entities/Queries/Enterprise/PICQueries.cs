@@ -1,0 +1,36 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Shared.Common;
+using Shared.Entities.Objs.Enterprise;
+
+namespace Shared.Entities.Queries.Enterprise
+{
+    public sealed class PICQueries
+    {
+        private readonly IPICDbContext _edb;
+
+        public PICQueries(IPICDbContext edb) => _edb = edb;
+
+        public async Task<int> AddAsync(long faskesId, string name, string email, string phone, PICCType picType, CancellationToken ct)
+        {
+            var now = DateTime.UtcNow;
+            var entity = new PIC
+            {
+                FaskesId = faskesId,
+                Name = name,
+                Email = email,
+                Phone = phone,
+                PICType = picType,
+                CreatedAt = now
+            };
+
+            _edb.PICs.Add(entity);
+            return await _edb.SaveChangesAsync(ct);
+        }
+
+        public async Task<List<PIC>> GetListByFaskesIdAsync(long faskesId, CancellationToken ct)
+            => await _edb.PICs.Where(r => r.FaskesId == faskesId).ToListAsync(ct);
+
+        public async Task<PIC?> GetByFaskesIdAndTypeAsync(long faskesId, PICCType type, CancellationToken ct)
+            => await _edb.PICs.FirstOrDefaultAsync(r => r.FaskesId == faskesId && r.PICType == type, ct);
+    }
+}

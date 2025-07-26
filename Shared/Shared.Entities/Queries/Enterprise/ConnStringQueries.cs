@@ -15,7 +15,7 @@ namespace Shared.Entities.Queries.Enterprise
             _edb = edb;
         }
 
-        public async Task GenerateByLoginIdIfMissing(long loginId, string noFaskes, CancellationToken ct)
+        public async Task<int> GenerateByLoginIdIfMissing(long loginId, string noFaskes, CancellationToken ct)
         {
             if (!await _edb.ConnStrings.AnyAsync(c => c.LoginId == loginId, ct))
             {
@@ -30,7 +30,11 @@ namespace Shared.Entities.Queries.Enterprise
                     CreatedAt = DateTime.UtcNow,
                     CreatorId = loginId
                 });
-                await _edb.SaveChangesAsync(ct);
+                return await _edb.SaveChangesAsync(ct);
+            }
+            else
+            {
+                return 1;
             }
         }
     }

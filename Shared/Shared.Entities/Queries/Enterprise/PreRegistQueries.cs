@@ -16,12 +16,12 @@ namespace Shared.Entities.Queries.Enterprise
             _logger = loggerFactory.CreateLogger("PreRegistQueries");
         }
 
-        public async Task UpdatePreRegisteredFlagAsync(string regEmail, string regPhone, CancellationToken ct)
+        public async Task<int> UpdatePreRegisteredFlagAsync(string regEmail, string regPhone, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(regEmail) && string.IsNullOrWhiteSpace(regPhone))
             {
                 _logger.LogError("UpdatePreRegisteredFlagAsync: At least one of parameters must be filled");
-                return;
+                return 0;
             }
 
             var emailTrimmed = regEmail?.Trim().ToLower();
@@ -35,13 +35,13 @@ namespace Shared.Entities.Queries.Enterprise
             if (row == null)
             {
                 _logger.LogError("UpdatePreRegisteredFlagAsync: An entry could not be found for these particular parameter");
-                return;
+                return 0;
             }
 
             row.IsRegistered = true;
             row.UpdatedAt = DateTime.UtcNow;
 
-            await _edb.SaveChangesAsync(ct);
+            return await _edb.SaveChangesAsync(ct);
         }
 
         public async Task<PreRegist?> GetRowByMailsync(PreRegistRequest req, CancellationToken ct)

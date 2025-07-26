@@ -131,7 +131,7 @@ namespace neo.preregist.Facades
             {
                 Success = isSuccess,
                 Message = message,
-                Data = data
+                Data = new List<PreRegistResponseData>() { data }
             };
 
             return response;

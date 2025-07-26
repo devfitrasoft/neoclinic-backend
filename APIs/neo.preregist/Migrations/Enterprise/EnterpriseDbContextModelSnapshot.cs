@@ -79,7 +79,7 @@ namespace neo.preregist.Migrations.Enterprise
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("EmailPj")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
@@ -95,7 +95,7 @@ namespace neo.preregist.Migrations.Enterprise
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("PhonePj")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")

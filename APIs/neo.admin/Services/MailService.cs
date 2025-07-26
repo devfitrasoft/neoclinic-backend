@@ -32,7 +32,7 @@ namespace neo.admin.Services
                 html);
         }
 
-        public Task SendConfirmPaymentReminder(string toEmail, string faskesName)
+        public Task SendRegistrationFeeAsync(string toEmail, string faskesName)
         {
             decimal fee = _regSettings.Fee;
             string rekening = _regSettings.BankAccountNumber;

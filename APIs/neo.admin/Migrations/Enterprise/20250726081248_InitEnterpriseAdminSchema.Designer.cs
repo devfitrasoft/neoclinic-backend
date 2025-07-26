@@ -12,7 +12,7 @@ using neo.admin.Data.Enterprise;
 namespace neo.admin.Migrations.Enterprise
 {
     [DbContext(typeof(EnterpriseDbContext))]
-    [Migration("20250720144640_InitEnterpriseAdminSchema")]
+    [Migration("20250726081248_InitEnterpriseAdminSchema")]
     partial class InitEnterpriseAdminSchema
     {
         /// <inheritdoc />
@@ -55,6 +55,114 @@ namespace neo.admin.Migrations.Enterprise
                     b.HasKey("Id");
 
                     b.ToTable("sys_auth_session");
+                });
+
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Billing", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("AmountDue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount_due");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("due_date");
+
+                    b.Property<long>("FaskesId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("faskes_id");
+
+                    b.Property<DateTime>("GraceEndDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("grace_end_date");
+
+                    b.Property<decimal>("GracePenalty")
+                        .HasColumnType("numeric")
+                        .HasColumnName("grace_penalty");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_paid");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_soft_deleted");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("payment_date");
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("period_end");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("period_start");
+
+                    b.Property<decimal?>("SumGracePenalty")
+                        .HasColumnType("numeric")
+                        .HasColumnName("sum_grace_penalty");
+
+                    b.Property<DateTime>("SuspensionDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("suspension_date");
+
+                    b.Property<long>("TransactionCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("transaction_count");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FaskesId");
+
+                    b.ToTable("sys_billing");
+                });
+
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.BillingSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<decimal>("GracePenalty")
+                        .HasColumnType("numeric")
+                        .HasColumnName("default_grace_penalty");
+
+                    b.Property<int>("GracePeriodMonths")
+                        .HasColumnType("integer")
+                        .HasColumnName("default_grace_period_months");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal>("RegistrationFee")
+                        .HasColumnType("numeric")
+                        .HasColumnName("registration_fee");
+
+                    b.Property<decimal>("TransactionPricePerUnit")
+                        .HasColumnType("numeric")
+                        .HasColumnName("transaction_price_per_unit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("sys_billing_setting");
                 });
 
             modelBuilder.Entity("Shared.Entities.Objs.Enterprise.ConnString", b =>
@@ -204,32 +312,6 @@ namespace neo.admin.Migrations.Enterprise
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
-                    b.Property<string>("EmailBill")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("email_bill");
-
-                    b.Property<string>("EmailTech")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("email_tech");
-
-                    b.Property<DateTime?>("ExpiredDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expired_date");
-
-                    b.Property<decimal?>("GracePenalty")
-                        .HasColumnType("numeric")
-                        .HasColumnName("grace_penalty");
-
-                    b.Property<int?>("GracePeriod")
-                        .HasColumnType("integer")
-                        .HasColumnName("grace_period");
-
-                    b.Property<DateTime?>("InitPaymentDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("init_payment_date");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -238,9 +320,11 @@ namespace neo.admin.Migrations.Enterprise
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
-                    b.Property<DateTime?>("LastPaymentDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_payment_date");
+                    b.Property<string>("NPWP")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("npwp");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -259,16 +343,6 @@ namespace neo.admin.Migrations.Enterprise
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
-
-                    b.Property<string>("PhoneBill")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("phone_bill");
-
-                    b.Property<string>("PhoneTech")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("phone_tech");
 
                     b.Property<DateTime>("RegisteredDate")
                         .HasColumnType("timestamp with time zone")
@@ -417,6 +491,72 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("sys_otp");
                 });
 
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.PIC", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("CreatorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("creator_id");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
+
+                    b.Property<long>("FaskesId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("faskes_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<short>("PICType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("pic_type");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long?>("UpdaterId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("updater_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FaskesId");
+
+                    b.ToTable("sys_pic");
+                });
+
             modelBuilder.Entity("Shared.Entities.Objs.Enterprise.PreRegist", b =>
                 {
                     b.Property<long>("Id")
@@ -461,6 +601,17 @@ namespace neo.admin.Migrations.Enterprise
                     b.ToTable("pre_regist");
                 });
 
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Billing", b =>
+                {
+                    b.HasOne("Shared.Entities.Objs.Enterprise.Faskes", "Faskes")
+                        .WithMany("Billings")
+                        .HasForeignKey("FaskesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Faskes");
+                });
+
             modelBuilder.Entity("Shared.Entities.Objs.Enterprise.ConnString", b =>
                 {
                     b.HasOne("Shared.Entities.Objs.Enterprise.Login", "Login")
@@ -500,6 +651,17 @@ namespace neo.admin.Migrations.Enterprise
                     b.Navigation("Faskes");
                 });
 
+            modelBuilder.Entity("Shared.Entities.Objs.Enterprise.PIC", b =>
+                {
+                    b.HasOne("Shared.Entities.Objs.Enterprise.Faskes", "Faskes")
+                        .WithMany("PICs")
+                        .HasForeignKey("FaskesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Faskes");
+                });
+
             modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Corporate", b =>
                 {
                     b.Navigation("Faskes");
@@ -507,7 +669,11 @@ namespace neo.admin.Migrations.Enterprise
 
             modelBuilder.Entity("Shared.Entities.Objs.Enterprise.Faskes", b =>
                 {
+                    b.Navigation("Billings");
+
                     b.Navigation("Logins");
+
+                    b.Navigation("PICs");
                 });
 #pragma warning restore 612, 618
         }

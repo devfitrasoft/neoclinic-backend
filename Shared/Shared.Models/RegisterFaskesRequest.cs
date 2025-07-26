@@ -11,6 +11,14 @@ namespace Shared.Models
         [JsonPropertyName("name"), Required]
         public string Name { get; init; } = null!;
 
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        
+        [JsonPropertyName("phone"), Required]
+        public string Phone { get; init; } = string.Empty!;
+
+        [JsonPropertyName("npwp"), Required]
+        public string Npwp { get; init; } = string.Empty!;
+
         [JsonPropertyName("address"), Required]
         public string Address { get; init; } = null!;
 
@@ -23,17 +31,26 @@ namespace Shared.Models
         [JsonPropertyName("corporateId")]
         public long? CorporateId { get; init; }
 
-        [JsonPropertyName("email"), Required]
-        public string Email { get; init; } = null!;
+        [JsonPropertyName("namePj"), Required]
+        public string NamePj { get; init; } = null!;
 
-        [JsonPropertyName("phone"), Required]
-        public string Phone { get; init; } = null!;
+        [JsonPropertyName("emailPj"), Required]
+        public string EmailPj { get; init; } = null!;
+
+        [JsonPropertyName("phonePj"), Required]
+        public string PhonePj { get; init; } = null!;
+
+        [JsonPropertyName("nameBill"), Required]
+        public string NameBill { get; init; } = null!;
 
         [JsonPropertyName("emailBill")]
         public string EmailBill { get; init; } = null!;
 
         [JsonPropertyName("phoneBill")]
         public string PhoneBill { get; init; } = null!;
+
+        [JsonPropertyName("nameTech"), Required]
+        public string NameTech { get; init; } = null!;
 
         [JsonPropertyName("emailTech")]
         public string EmailTech { get; init; } = null!;

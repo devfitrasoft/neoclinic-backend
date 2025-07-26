@@ -42,6 +42,13 @@ namespace Shared.Entities.Queries
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }
 
+    public interface IPICDbContext
+    {
+        DbSet<PIC> PICs { get; }
+
+        Task<int> SaveChangesAsync(CancellationToken ct = default);
+    }
+
     public interface IBillingDbContext
     {
         DbSet<Billing> Billings { get; }

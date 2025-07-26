@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Shared.Common;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shared.Entities.Objs.Enterprise
@@ -16,7 +17,7 @@ namespace Shared.Entities.Objs.Enterprise
         [Required, Column("code"), MaxLength(255)]
         public string Code { get; set; } = null!;
 
-        [Required, Column("type")] public int Type { get; set; }
+        [Required, Column("type")] public OtpType Type { get; set; }
         [Column("is_used")] public bool IsUsed { get; set; } = false;
         [Required, Column("expired_at")] public DateTime ExpiredAt { get; set; }
         [Column("created_at")] public DateTime CreatedAt { get; set; }

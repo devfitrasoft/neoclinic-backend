@@ -29,6 +29,24 @@ namespace neo.admin.Migrations.Enterprise
                 });
 
             migrationBuilder.CreateTable(
+                name: "sys_billing_setting",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    default_grace_period_months = table.Column<int>(type: "integer", nullable: false),
+                    default_grace_penalty = table.Column<decimal>(type: "numeric", nullable: false),
+                    registration_fee = table.Column<decimal>(type: "numeric", nullable: false),
+                    transaction_price_per_unit = table.Column<decimal>(type: "numeric", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sys_billing_setting", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "sys_corporate",
                 columns: table => new
                 {
@@ -55,22 +73,14 @@ namespace neo.admin.Migrations.Enterprise
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     no_faskes = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    corporate_id = table.Column<long>(type: "bigint", nullable: true),
+                    npwp = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    email_bill = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    phone_bill = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    email_tech = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    phone_tech = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     address = table.Column<string>(type: "text", nullable: false),
+                    corporate_id = table.Column<long>(type: "bigint", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     registered_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    init_payment_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    last_payment_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    expired_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    grace_period = table.Column<int>(type: "integer", nullable: true),
-                    grace_penalty = table.Column<decimal>(type: "numeric", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     creator_id = table.Column<long>(type: "bigint", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -83,6 +93,37 @@ namespace neo.admin.Migrations.Enterprise
                         name: "FK_sys_faskes_sys_corporate_corporate_id",
                         column: x => x.corporate_id,
                         principalTable: "sys_corporate",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "sys_billing",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    faskes_id = table.Column<long>(type: "bigint", nullable: false),
+                    period_start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    period_end = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    due_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    suspension_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    grace_end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    is_paid = table.Column<bool>(type: "boolean", nullable: false),
+                    payment_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    transaction_count = table.Column<long>(type: "bigint", nullable: false),
+                    amount_due = table.Column<decimal>(type: "numeric", nullable: false),
+                    grace_penalty = table.Column<decimal>(type: "numeric", nullable: false),
+                    sum_grace_penalty = table.Column<decimal>(type: "numeric", nullable: true),
+                    is_soft_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sys_billing", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_sys_billing_sys_faskes_faskes_id",
+                        column: x => x.faskes_id,
+                        principalTable: "sys_faskes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -124,6 +165,35 @@ namespace neo.admin.Migrations.Enterprise
                 });
 
             migrationBuilder.CreateTable(
+                name: "sys_pic",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    faskes_id = table.Column<long>(type: "bigint", nullable: false),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    pic_type = table.Column<short>(type: "smallint", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    creator_id = table.Column<long>(type: "bigint", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    updater_id = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sys_pic", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_sys_pic_sys_faskes_faskes_id",
+                        column: x => x.faskes_id,
+                        principalTable: "sys_faskes",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "sys_connstring",
                 columns: table => new
                 {
@@ -151,6 +221,16 @@ namespace neo.admin.Migrations.Enterprise
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_sys_billing_faskes_id",
+                table: "sys_billing",
+                column: "faskes_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_sys_billing_setting_is_active",
+                table: "sys_billing_setting",
+                column: "is_active");
 
             migrationBuilder.CreateIndex(
                 name: "IX_sys_connstring_login_id",
@@ -199,6 +279,11 @@ namespace neo.admin.Migrations.Enterprise
                 table: "sys_login",
                 column: "username",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_sys_pic_faskes_id",
+                table: "sys_pic",
+                column: "faskes_id");
         }
 
         /// <inheritdoc />
@@ -208,7 +293,16 @@ namespace neo.admin.Migrations.Enterprise
                 name: "sys_auth_session");
 
             migrationBuilder.DropTable(
+                name: "sys_billing");
+
+            migrationBuilder.DropTable(
+                name: "sys_billing_setting");
+
+            migrationBuilder.DropTable(
                 name: "sys_connstring");
+
+            migrationBuilder.DropTable(
+                name: "sys_pic");
 
             migrationBuilder.DropTable(
                 name: "sys_login");

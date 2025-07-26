@@ -11,8 +11,8 @@ namespace neo.admin.Facades
 {
     public interface IRegistrationFacade
     {
-        Task<RegisterFaskesResponse> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct);
-        Task ActivateFaskesAsync(string loginUsername, CancellationToken ct = default);
+        Task<RegisterFaskesResponseData> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct);
+        Task<bool> ActivateFaskesAsync(string loginUsername, CancellationToken ct = default);
     }
 
     public sealed class RegistrationFacade : IRegistrationFacade
@@ -21,12 +21,13 @@ namespace neo.admin.Facades
         private readonly ILogger<RegistrationFacade> _logger;
 
         private readonly MailService _mail;
-        
+
+        private readonly PICQueries _picQry;
         private readonly LoginQueries _loginQry;
+        private readonly OtpTokenQueries _otpQry;
         private readonly FaskesQueries _faskesQry;
         private readonly CorporateQueries _corpQry;
         private readonly ConnStringQueries _cstrQry;
-        private readonly OtpTokenQueries _otpQry;
         private readonly PreRegistQueries _preRegistQry;
 
         private readonly DbProvisionerFactory _prov;
@@ -35,7 +36,7 @@ namespace neo.admin.Facades
 
         public RegistrationFacade(ILogger<RegistrationFacade> logger, IConfiguration cfg, EnterpriseDbContext edb, DbProvisionerFactory prov,
             MailService mail, ICaptchaValidatorService captcha, OtpTokenQueries otpQry, PreRegistQueries preRegistQry,
-            LoginQueries loginQry, FaskesQueries faskesQry, CorporateQueries corpQry) 
+            LoginQueries loginQry, FaskesQueries faskesQry, CorporateQueries corpQry, PICQueries picQry) 
         {
             _cfg = cfg;
             _logger = logger;
@@ -43,11 +44,12 @@ namespace neo.admin.Facades
             _mail = mail;
 
             _prov = prov;
-            
+
+            _otpQry = otpQry;
+            _picQry = picQry;
+            _corpQry = corpQry;
             _loginQry = loginQry;
             _faskesQry = faskesQry;
-            _corpQry = corpQry;
-            _otpQry = otpQry;
             _preRegistQry = preRegistQry;
             _cstrQry = new ConnStringQueries(cfg, edb); // it's loaded by every faskes db generation
 
@@ -66,7 +68,7 @@ namespace neo.admin.Facades
         /// <param name="ct"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<RegisterFaskesResponse> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct)
+        public async Task<RegisterFaskesResponseData> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct)
         {
             await _otpQry.MarkIsUsedAsync(req.Otp, OtpType.PreRegist, ct);
 
@@ -94,23 +96,28 @@ namespace neo.admin.Facades
             else
             {
                 success = preExisted = true;  // mark this faskesQry as pre-existed
-                return new RegisterFaskesResponse(success, preExisted);
+                return new RegisterFaskesResponseData(success, preExisted);
             }
 
-            // 3. Create SU login if it doesn't already exist
+            // 3. Insert all PICs (PJ, Billing, Technical)
+            int addPjPICRes = await _picQry.AddAsync(faskes.Id, req.NamePj, req.EmailPj, req.PhonePj, PICCType.PJ, ct);
+            int addBillPICRes = await _picQry.AddAsync(faskes.Id, req.NameBill, req.EmailBill, req.PhoneBill, PICCType.Billing, ct);
+            int addTechPICRes = await _picQry.AddAsync(faskes.Id, req.NameTech, req.EmailTech, req.PhoneTech, PICCType.Tech, ct);
+
+            // 4. Create SU login if it doesn't already exist
             string username = $"{faskes.NoFaskes}.SU";
             var login = await _loginQry.GenerateNewLoginIfNotExist(username, req, faskes, corp, ct);
 
-            // 4. Ask user to confirm payment
-            await _mail.SendConfirmPaymentReminder(req.Email, faskes.Name);
+            //// 5. Send email to user regarding initial billing
+            //await _mail.SendRegistrationFeeAsync(req.EmailPj, faskes.Name);
 
-            // 5. Only return true when both were newly inserted (Id > 0)
-            success = faskes.Id > 0 && login.Id > 0;
+            // 6. Only return true when both were newly inserted (Id > 0)
+            success = faskes.Id > 0 && addPjPICRes > 0 && addBillPICRes > 0 && addTechPICRes > 0 && login.Id > 0;
 
-            return new RegisterFaskesResponse(success, preExisted);
+            return new RegisterFaskesResponseData(success, preExisted);
         }
     
-        public async Task ActivateFaskesAsync(string loginUsername, CancellationToken ct = default)
+        public async Task<bool> ActivateFaskesAsync(string loginUsername, CancellationToken ct = default)
         {
             /* 1. parse "<nofaskes>.SU" */
             var segments = StringParser.DivideToSegmentsByDots(loginUsername);
@@ -122,26 +129,35 @@ namespace neo.admin.Facades
             if (login == null) 
             {
                 _logger.LogError("ActivateFaskesAsync: Login not found");
-                return;
+                return false;
             }
 
             var faskes = login.Faskes;
 
             /* 3. provision clinic DB (creates, migrates, seeds) */
-            await _prov.ProvisionAsync(noFaskes, login.Id, faskes.Name, ct);
+            bool resProvision = await _prov.ProvisionAsync(noFaskes, login.Id, faskes.Name, ct);
 
             /* 4. insert sys_connstring if missing */
-            await _cstrQry.GenerateByLoginIdIfMissing(login.Id, faskes.NoFaskes, ct);
+            int resCstring = await _cstrQry.GenerateByLoginIdIfMissing(login.Id, faskes.NoFaskes, ct);
 
-            /* 5. update is_registered_web_flag in db_neoclinic pre_regist for registered email or phone or both */
-            await _preRegistQry.UpdatePreRegisteredFlagAsync(faskes.Email, faskes.Phone, ct);
+            /* 5. update is_registered in db_neoclinic pre_regist for registered email or phone or both */
+            var picPJ = await _picQry.GetByFaskesIdAndTypeAsync(faskes.Id, PICCType.PJ, ct);
+            int resUpdateCPreRegist = picPJ == null ? 0 : await _preRegistQry.UpdatePreRegisteredFlagAsync(picPJ.Email, picPJ.Phone, ct);
 
             /* 6. generate new otp for reset password */
             var OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken :Expiry"]);
-            await _otpQry.AddAsync(login.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.ResetPwd, ct);
+            int resOtp = await _otpQry.AddAsync(login.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.ResetPwd, ct);
 
-            /* 7. send SU invite mail */
-            await _mail.SendInviteAsync(faskes.Email, login.Username, OtpAndExpiry);
+            if(resProvision && resCstring > 0 && resUpdateCPreRegist > 0 && resOtp > 0)
+            {
+                /* 7. send SU invite mail */
+                await _mail.SendInviteAsync(faskes.Email, login.Username, OtpAndExpiry);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

@@ -10,7 +10,8 @@ namespace Shared.Entities.Queries.Enterprise
         public FaskesQueries(IEnterpriseDbContext db) => _db = db;
 
         public Task<Faskes?> GetAsync(string noFaskes, CancellationToken ct) =>
-            _db.Faskeses.FirstOrDefaultAsync(f => f.NoFaskes == noFaskes, ct);
+            _db.Faskeses.Include(f => f.PICs)
+                        .FirstOrDefaultAsync(f => f.NoFaskes == noFaskes, ct);
 
         public async Task<Faskes> CreateNewFaskes(RegisterFaskesRequest req, Corporate? corp, CancellationToken ct)
         {
@@ -24,15 +25,11 @@ namespace Shared.Entities.Queries.Enterprise
             {
                 NoFaskes = req.NoFaskes,
                 Name = req.Name,
-                CorporateId = corp?.Id,
-                Corporate = corp,
+                NPWP = req.Npwp,
                 Email = req.Email,
                 Phone = req.Phone,
-                EmailBill = req.EmailBill,
-                PhoneBill = req.PhoneBill,
-                EmailTech = req.EmailTech,
-                PhoneTech = req.PhoneTech,
                 Address = req.Address,
+                CorporateId = corp?.Id,
                 RegisteredDate = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 CreatorId = 0

@@ -7,7 +7,7 @@ namespace neo.preregist.Models
     public class PreRegistResponse : CommonAPIBodyResponse
     {
         [JsonPropertyName("data")]
-        public PreRegistResponseData Data { get; set; } = null!;
+        public IEnumerable<PreRegistResponseData> Data { get; set; } = new List<PreRegistResponseData>();
     }
 
     public sealed record PreRegistResponseData(

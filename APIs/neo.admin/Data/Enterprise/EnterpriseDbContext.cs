@@ -4,7 +4,8 @@ using Shared.Entities.Queries;
 
 namespace neo.admin.Data.Enterprise
 {
-    public class EnterpriseDbContext : DbContext, IEnterpriseDbContext, IPreRegistDbContext, IOtpTokenDbContext, IBillingDbContext
+    public class EnterpriseDbContext : DbContext, IEnterpriseDbContext, IPreRegistDbContext, 
+        IOtpTokenDbContext, IBillingDbContext, IPICDbContext
     {
         public EnterpriseDbContext(DbContextOptions<EnterpriseDbContext> options) : base(options) { }
 
@@ -18,6 +19,8 @@ namespace neo.admin.Data.Enterprise
 
         public DbSet<Billing> Billings => Set<Billing>();
         public DbSet<BillingSetting> BillingsSettings => Set<BillingSetting>();
+
+        public DbSet<PIC> PICs => Set<PIC>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -47,6 +50,11 @@ namespace neo.admin.Data.Enterprise
 
                 e.HasMany(f => f.Billings)
                  .WithOne(b => b.Faskes)
+                 .HasForeignKey(b => b.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasMany(f => f.PICs)
+                 .WithOne(p => p.Faskes)
                  .HasForeignKey(b => b.FaskesId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
@@ -104,6 +112,21 @@ namespace neo.admin.Data.Enterprise
                  .UseIdentityByDefaultColumn();
 
                 e.HasIndex(s => s.IsActive); // for easy lookup of current active rule
+            });
+
+            // ---- sys_pic ----------------------------------------
+            b.Entity<PIC>(e =>
+            {
+                e.Property(x => x.Id)
+                 .UseIdentityByDefaultColumn();
+
+                e.Property(x => x.PICType)
+                 .HasColumnType("smallint");
+
+                e.HasOne(p => p.Faskes)
+                 .WithMany(f => f.PICs)
+                 .HasForeignKey(p => p.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
