@@ -41,4 +41,12 @@ namespace Shared.Entities.Queries
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }
+
+    public interface IBillingDbContext
+    {
+        DbSet<Billing> Billings { get; }
+        DbSet<BillingSetting> BillingsSettings { get; }
+
+        Task<int> SaveChangesAsync(CancellationToken ct = default);
+    }
 }

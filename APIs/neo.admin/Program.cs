@@ -42,7 +42,7 @@ b.Services.AddScoped<IPreRegistDbContext>(sp => sp.GetRequiredService<Enterprise
 b.Services.AddScoped<IOtpTokenDbContext>(sp => sp.GetRequiredService<EnterpriseDbContext>());
 
 /* ------------ automatic migration ------------ */
-b.Services.AddEfAutoMigration<EnterpriseDbContext>("sys_corporate", "sys_faskes", "sys_login", "sys_auth_session");
+b.Services.AddEfAutoMigration<EnterpriseDbContext>("sys_billing_setting", "sys_corporate", "sys_faskes", "sys_billing", "sys_login", "sys_auth_session");
 /* --------------------------------------------- */
 
 /*  Load Factories  */

@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Shared\Shared.Common\Shared.Common.csproj" />
-    <ProjectReference Include="..\..\Shared\Shared.Common\Shared.Common.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.Communication\Shared.Communication.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.EFCore\Shared.EFCore.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.Entities\Shared.Entities.csproj" />
