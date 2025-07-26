@@ -4,7 +4,7 @@ using Shared.Entities.Queries;
 
 namespace neo.admin.Data.Enterprise
 {
-    public class EnterpriseDbContext : DbContext, IEnterpriseDbContext, IPreRegistDbContext, IOtpTokenDbContext
+    public class EnterpriseDbContext : DbContext, IEnterpriseDbContext, IPreRegistDbContext, IOtpTokenDbContext, IBillingDbContext
     {
         public EnterpriseDbContext(DbContextOptions<EnterpriseDbContext> options) : base(options) { }
 
@@ -15,6 +15,9 @@ namespace neo.admin.Data.Enterprise
         public DbSet<PreRegist> PreRegists => Set<PreRegist>();
         public DbSet<OtpToken> OtpTokens => Set<OtpToken>();
         public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
+
+        public DbSet<Billing> Billings => Set<Billing>();
+        public DbSet<BillingSetting> BillingsSettings => Set<BillingSetting>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -41,6 +44,11 @@ namespace neo.admin.Data.Enterprise
                   .WithMany(c => c.Faskes)
                   .HasForeignKey(f => f.CorporateId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasMany(f => f.Billings)
+                 .WithOne(b => b.Faskes)
+                 .HasForeignKey(b => b.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ---- sys_login -------------------------------------
@@ -75,6 +83,27 @@ namespace neo.admin.Data.Enterprise
                 e.HasOne(x => x.Login)
                  .WithMany()
                  .HasForeignKey(x => x.LoginId);
+            });
+
+            // ---- sys_billing ------------------------------------
+            b.Entity<Billing>(e => 
+            { 
+                e.Property(x => x.Id) 
+                 .UseIdentityByDefaultColumn();
+
+                e.HasOne(b => b.Faskes)
+                 .WithMany(f => f.Billings)
+                 .HasForeignKey(b => b.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ---- sys_billing_setting ----------------------------
+            b.Entity<BillingSetting>(e =>
+            {
+                e.Property(s => s.Id)
+                 .UseIdentityByDefaultColumn();
+
+                e.HasIndex(s => s.IsActive); // for easy lookup of current active rule
             });
         }
     }
