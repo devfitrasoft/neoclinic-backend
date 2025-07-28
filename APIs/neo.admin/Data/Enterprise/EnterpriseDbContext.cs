@@ -18,7 +18,7 @@ namespace neo.admin.Data.Enterprise
         public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
 
         public DbSet<Billing> Billings => Set<Billing>();
-        public DbSet<BillingSetting> BillingsSettings => Set<BillingSetting>();
+        public DbSet<BillingSetting> BillingSettings => Set<BillingSetting>();
 
         public DbSet<PIC> PICs => Set<PIC>();
 

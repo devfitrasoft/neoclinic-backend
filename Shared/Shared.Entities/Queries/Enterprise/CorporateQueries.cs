@@ -37,5 +37,11 @@ namespace Shared.Entities.Queries.Enterprise
             await _db.SaveChangesAsync(ct);
             return corp;
         }
+
+        public async Task<int> UpdateIsActiveAsync(Corporate corporate, bool isActive, CancellationToken ct)
+        {
+            corporate.IsActive = isActive;
+            return await _db.SaveChangesAsync(ct);
+        }
     }
 }

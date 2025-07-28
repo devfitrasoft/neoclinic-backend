@@ -4,7 +4,7 @@ using Shared.Entities.Objs.Enterprise;
 
 namespace Shared.Entities.Queries.Enterprise
 {
-    public class OtpTokenQueries
+    public sealed class OtpTokenQueries
     {
         private readonly IOtpTokenDbContext _edb;
 
@@ -71,13 +71,13 @@ namespace Shared.Entities.Queries.Enterprise
             return await _edb.SaveChangesAsync(ct);
         }
 
-        public async Task RenewOtpAsync(OtpToken row, string newHashedOtp, DateTime newExpiresAt, CancellationToken ct)
+        public async Task<int> RenewOtpAsync(OtpToken row, string newHashedOtp, DateTime newExpiresAt, CancellationToken ct)
         {
             row.Code = newHashedOtp;
             row.ExpiredAt = newExpiresAt;
             row.UpdatedAt = DateTime.UtcNow;
 
-            await _edb.SaveChangesAsync(ct);
+            return await _edb.SaveChangesAsync(ct);
         }
 
         public async Task<long?> GetTargetIdByOtpAsync(string otp, OtpType tokenType, CancellationToken ct)

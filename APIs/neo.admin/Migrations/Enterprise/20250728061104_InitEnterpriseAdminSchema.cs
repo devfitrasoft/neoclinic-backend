@@ -104,18 +104,19 @@ namespace neo.admin.Migrations.Enterprise
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     faskes_id = table.Column<long>(type: "bigint", nullable: false),
-                    period_start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    period_end = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    due_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    suspension_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    grace_end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    billing_type = table.Column<int>(type: "integer", nullable: false),
+                    period_start = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    period_end = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    due_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    suspension_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    grace_end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     is_paid = table.Column<bool>(type: "boolean", nullable: false),
                     payment_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    transaction_count = table.Column<long>(type: "bigint", nullable: false),
-                    amount_due = table.Column<decimal>(type: "numeric", nullable: false),
-                    grace_penalty = table.Column<decimal>(type: "numeric", nullable: false),
+                    transaction_count = table.Column<long>(type: "bigint", nullable: true),
+                    amount_due = table.Column<decimal>(type: "numeric", nullable: true),
+                    grace_penalty = table.Column<decimal>(type: "numeric", nullable: true),
                     sum_grace_penalty = table.Column<decimal>(type: "numeric", nullable: true),
-                    is_soft_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {

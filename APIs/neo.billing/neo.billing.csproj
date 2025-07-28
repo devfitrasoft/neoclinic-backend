@@ -32,4 +32,9 @@
     <ProjectReference Include="..\..\Shared\Shared.Models\Shared.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Facades\" />
+    <Folder Include="BackgroundServices\" />
+  </ItemGroup>
+
 </Project>

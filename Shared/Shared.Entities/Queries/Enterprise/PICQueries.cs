@@ -10,7 +10,7 @@ namespace Shared.Entities.Queries.Enterprise
 
         public PICQueries(IPICDbContext edb) => _edb = edb;
 
-        public async Task<int> AddAsync(long faskesId, string name, string email, string phone, PICCType picType, CancellationToken ct)
+        public async Task<PIC> AddAsync(long faskesId, string name, string email, string phone, PICCType picType, CancellationToken ct)
         {
             var now = DateTime.UtcNow;
             var entity = new PIC
@@ -24,6 +24,14 @@ namespace Shared.Entities.Queries.Enterprise
             };
 
             _edb.PICs.Add(entity);
+            await _edb.SaveChangesAsync(ct);
+
+            return entity;
+        }
+
+        public async Task<int> UpdateIsActiveAsync(PIC pic, bool isActive, CancellationToken ct)
+        {
+            pic.IsActive = isActive;
             return await _edb.SaveChangesAsync(ct);
         }
 

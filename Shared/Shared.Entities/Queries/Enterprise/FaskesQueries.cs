@@ -13,7 +13,7 @@ namespace Shared.Entities.Queries.Enterprise
             _db.Faskeses.Include(f => f.PICs)
                         .FirstOrDefaultAsync(f => f.NoFaskes == noFaskes, ct);
 
-        public async Task<Faskes> CreateNewFaskes(RegisterFaskesRequest req, Corporate? corp, CancellationToken ct)
+        public async Task<Faskes> AddNewAsync(RegisterFaskesRequest req, Corporate? corp, CancellationToken ct)
         {
             // Double-check again to avoid race condition
             var existing = await _db.Faskeses
@@ -39,6 +39,12 @@ namespace Shared.Entities.Queries.Enterprise
             await _db.SaveChangesAsync(ct);
 
             return faskes;
+        }
+
+        public async Task<int> UpdateIsActiveAsync(Faskes faskes, bool isActive, CancellationToken ct)
+        {
+            faskes.IsActive = isActive;
+            return await _db.SaveChangesAsync(ct);
         }
     }
 }

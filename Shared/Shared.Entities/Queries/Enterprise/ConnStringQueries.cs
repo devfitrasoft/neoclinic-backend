@@ -5,7 +5,7 @@ using Shared.Entities.Objs.Enterprise;
 
 namespace Shared.Entities.Queries.Enterprise
 {
-    public class ConnStringQueries
+    public sealed class ConnStringQueries
     {
         private readonly IConfiguration _cfg;
         private readonly IEnterpriseDbContext _edb;

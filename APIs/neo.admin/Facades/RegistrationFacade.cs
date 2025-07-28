@@ -2,6 +2,8 @@
 using neo.admin.Migrations.Factories;
 using neo.admin.Models;
 using neo.admin.Services;
+using Org.BouncyCastle.Ocsp;
+using Serilog;
 using Shared.Common;
 using Shared.Entities.Objs.Enterprise;
 using Shared.Entities.Queries.Enterprise;
@@ -26,9 +28,11 @@ namespace neo.admin.Facades
         private readonly LoginQueries _loginQry;
         private readonly OtpTokenQueries _otpQry;
         private readonly FaskesQueries _faskesQry;
+        private readonly BillingQueries _billingQry;
         private readonly CorporateQueries _corpQry;
         private readonly ConnStringQueries _cstrQry;
         private readonly PreRegistQueries _preRegistQry;
+        private readonly BillingSettingQueries _billingSettingQry;
 
         private readonly DbProvisionerFactory _prov;
 
@@ -36,7 +40,8 @@ namespace neo.admin.Facades
 
         public RegistrationFacade(ILogger<RegistrationFacade> logger, IConfiguration cfg, EnterpriseDbContext edb, DbProvisionerFactory prov,
             MailService mail, ICaptchaValidatorService captcha, OtpTokenQueries otpQry, PreRegistQueries preRegistQry,
-            LoginQueries loginQry, FaskesQueries faskesQry, CorporateQueries corpQry, PICQueries picQry) 
+            LoginQueries loginQry, FaskesQueries faskesQry, CorporateQueries corpQry, PICQueries picQry, BillingSettingQueries billingSettingQry,
+            BillingQueries billingQry) 
         {
             _cfg = cfg;
             _logger = logger;
@@ -50,7 +55,9 @@ namespace neo.admin.Facades
             _corpQry = corpQry;
             _loginQry = loginQry;
             _faskesQry = faskesQry;
+            _billingQry = billingQry;
             _preRegistQry = preRegistQry;
+            _billingSettingQry = billingSettingQry;
             _cstrQry = new ConnStringQueries(cfg, edb); // it's loaded by every faskes db generation
 
             _captcha = captcha;
@@ -83,6 +90,7 @@ namespace neo.admin.Facades
                     ? await _corpQry.GetByIdAsync(req.CorporateId.Value, ct)
                     : await _corpQry.CreateCorporateIfMissing(req.CorporateName!, ct);
             }
+            bool resCorp = req.IsCorporate ? corp != null : true;
 
             bool preExisted = false;
             bool success = false;
@@ -91,7 +99,7 @@ namespace neo.admin.Facades
 
             if (faskes == null)
             {
-                faskes = await _faskesQry.CreateNewFaskes(req, corp, ct);
+                faskes = await _faskesQry.AddNewAsync(req, corp, ct);
             }
             else
             {
@@ -100,19 +108,24 @@ namespace neo.admin.Facades
             }
 
             // 3. Insert all PICs (PJ, Billing, Technical)
-            int addPjPICRes = await _picQry.AddAsync(faskes.Id, req.NamePj, req.EmailPj, req.PhonePj, PICCType.PJ, ct);
-            int addBillPICRes = await _picQry.AddAsync(faskes.Id, req.NameBill, req.EmailBill, req.PhoneBill, PICCType.Billing, ct);
-            int addTechPICRes = await _picQry.AddAsync(faskes.Id, req.NameTech, req.EmailTech, req.PhoneTech, PICCType.Tech, ct);
+            var addPjPICRes = await _picQry.AddAsync(faskes.Id, req.NamePj, req.EmailPj, req.PhonePj, PICCType.PJ, ct);
+            var addBillPICRes = await _picQry.AddAsync(faskes.Id, req.NameBill, req.EmailBill, req.PhoneBill, PICCType.Billing, ct);
+            var addTechPICRes = await _picQry.AddAsync(faskes.Id, req.NameTech, req.EmailTech, req.PhoneTech, PICCType.Tech, ct);
 
             // 4. Create SU login if it doesn't already exist
             string username = $"{faskes.NoFaskes}.SU";
             var login = await _loginQry.GenerateNewLoginIfNotExist(username, req, faskes, corp, ct);
 
-            //// 5. Send email to user regarding initial billing
-            //await _mail.SendRegistrationFeeAsync(req.EmailPj, faskes.Name);
+            // 5. Create new registration billing
+            var billingSetting = await _billingSettingQry.GetOrCreateActiveBillingSettingAsync(ct);
+            var registerBilling = await _billingQry.GenerateRegistrationBillingAsync(faskes.Id, billingSetting, ct);
+
+            // 5. Send email to user regarding initial billing
+            await _mail.SendRegistrationFeeAsync(req.EmailPj, faskes.Name, billingSetting.RegistrationFee);
 
             // 6. Only return true when both were newly inserted (Id > 0)
-            success = faskes.Id > 0 && addPjPICRes > 0 && addBillPICRes > 0 && addTechPICRes > 0 && login.Id > 0;
+            success = IsRegistrationSuccessful(resCorp, faskes.Id, addPjPICRes.Id, addBillPICRes.Id, 
+                addTechPICRes.Id, login.Id, billingSetting.Id, registerBilling.Id);
 
             return new RegisterFaskesResponseData(success, preExisted);
         }
@@ -134,24 +147,58 @@ namespace neo.admin.Facades
 
             var faskes = login.Faskes;
 
-            /* 3. provision clinic DB (creates, migrates, seeds) */
+            var picPJ = faskes.PICs.FirstOrDefault(p => p.PICType == PICCType.PJ);
+            var picBilling = faskes.PICs.FirstOrDefault(p => p.PICType == PICCType.Billing);
+            var picTech = faskes.PICs.FirstOrDefault(p => p.PICType == PICCType.Tech);
+
+            /* 3. grab registration billing by faskesId */
+            var registrationBill = await _billingQry.GetRegistrationBillingByFaskesIdAsync(faskes.Id, ct);
+
+            if (registrationBill == null)
+            {
+                _logger.LogInformation("No registration billing detected for this activation, re-generate new billing");
+
+                /* 4. re-create new registration billing in-case this faskes doesn't have any billing */
+                var billingSetting = await _billingSettingQry.GetOrCreateActiveBillingSettingAsync(ct);
+                var registerBilling = await _billingQry.GenerateRegistrationBillingAsync(faskes.Id, billingSetting, ct);
+
+                /* 5. re-send email to user regarding initial billing */
+                await _mail.SendRegistrationFeeAsync(picPJ.Email, faskes.Name, billingSetting.RegistrationFee);
+
+                /* 6. return immediately */
+                return false;
+            }
+
+            /* 4. mark current registration billing as paid */
+            int resMarkPaidBill = await _billingQry.MarkIsPaidTrueAsync(registrationBill, ct);
+
+            /* 4. provision clinic DB (creates, migrates, seeds) */
             bool resProvision = await _prov.ProvisionAsync(noFaskes, login.Id, faskes.Name, ct);
 
-            /* 4. insert sys_connstring if missing */
+            /* 5. insert sys_connstring if missing */
             int resCstring = await _cstrQry.GenerateByLoginIdIfMissing(login.Id, faskes.NoFaskes, ct);
 
-            /* 5. update is_registered in db_neoclinic pre_regist for registered email or phone or both */
-            var picPJ = await _picQry.GetByFaskesIdAndTypeAsync(faskes.Id, PICCType.PJ, ct);
-            int resUpdateCPreRegist = picPJ == null ? 0 : await _preRegistQry.UpdatePreRegisteredFlagAsync(picPJ.Email, picPJ.Phone, ct);
+            /* 6. update is_registered in db_neoclinic pre_regist for registered email or phone or both */
+            int resUpdatePreRegist = picPJ == null ? 0 : await _preRegistQry.UpdatePreRegisteredFlagAsync(picPJ.Email, picPJ.Phone, ct);
 
-            /* 6. generate new otp for reset password */
+            /* 7. update is_active for super user, faskes, corporate (if exist) and all PICs */
+            int resIsActiveLogin = await _loginQry.UpdateIsActiveAsync(login, true, ct);
+            int resIsActiveFaskes = await _faskesQry.UpdateIsActiveAsync(faskes, true, ct);
+            int resIsActiveCorporate = faskes.Corporate == null ? 1 : await _corpQry.UpdateIsActiveAsync(faskes.Corporate, true, ct);
+            int resIsActivePicPJ = picPJ == null ? 0 : await _picQry.UpdateIsActiveAsync(picPJ, true, ct);
+            int resIsActivatePicBilling = picBilling == null ? 0 : await _picQry.UpdateIsActiveAsync(picBilling, true, ct);
+            int resIsActivatePicTech = picTech == null ? 0 : await _picQry.UpdateIsActiveAsync(picTech, true, ct);
+
+            /* 8. generate new otp for reset password */
             var OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken :Expiry"]);
             int resOtp = await _otpQry.AddAsync(login.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.ResetPwd, ct);
 
-            if(resProvision && resCstring > 0 && resUpdateCPreRegist > 0 && resOtp > 0)
+            if(IsActivationSuccessful(resMarkPaidBill, resProvision, resCstring, resUpdatePreRegist, 
+                resIsActiveLogin, resIsActiveFaskes, resIsActiveCorporate, 
+                resIsActivePicPJ, resIsActivatePicBilling, resIsActivatePicTech, resOtp))
             {
-                /* 7. send SU invite mail */
-                await _mail.SendInviteAsync(faskes.Email, login.Username, OtpAndExpiry);
+                /* 9. send SU invite mail */
+                await _mail.SendInviteAsync(picPJ.Email, login.Username, OtpAndExpiry);
                 return true;
             }
             else
@@ -159,5 +206,16 @@ namespace neo.admin.Facades
                 return false;
             }
         }
+
+        private bool IsRegistrationSuccessful(bool resCorp, long faskesId, long addPjPICResId, long addBillPICResId, long addTechPICResId,
+            long loginId, long billingSettingId, long registerBillingId)
+            => resCorp && faskesId > 0 && addPjPICResId > 0 && addBillPICResId > 0 && addTechPICResId > 0 && loginId > 0 && billingSettingId > 0 && registerBillingId > 0;
+
+        private bool IsActivationSuccessful(int resMarkPaidBill, bool resProvision, int resCstring, int resUpdatePreRegist, int resIsActiveLogin,
+            int resIsActiveFaskes, int resIsActiveCorporate, int resIsActivePicPJ, int resIsActivatePicBilling, int resIsActivatePicTech,
+            int resOtp)
+            => resMarkPaidBill > 0 && resProvision && resCstring > 0 && resUpdatePreRegist > 0 && resUpdatePreRegist > 0 && resIsActiveLogin > 0
+               && resIsActiveFaskes > 0 && resIsActiveCorporate > 0 && resIsActivePicPJ > 0 && resIsActivatePicBilling > 0
+               && resIsActivatePicTech > 0 && resOtp > 0;
     }
 }

@@ -11,31 +11,153 @@
 			"name": "neo.admin",
 			"item": [
 				{
-					"name": "Check Faskes by No. Faskes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url_neo.admin}}/faskes/1111U027",
-							"host": [
-								"{{base_url_neo.admin}}"
-							],
-							"path": [
-								"faskes",
-								"1111U027"
-							]
+					"name": "Register",
+					"item": [
+						{
+							"name": "Check Faskes by No. Faskes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_neo.admin}}/faskes/search/1111U028",
+									"host": [
+										"{{base_url_neo.admin}}"
+									],
+									"path": [
+										"faskes",
+										"search",
+										"1111U028"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search Corporate (for dropdown)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_neo.admin}}/corporates?q=medika",
+									"host": [
+										"{{base_url_neo.admin}}"
+									],
+									"path": [
+										"corporates"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": "medika"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Register New Faskes",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"noFaskes\": \"1111U028\",\r\n  \"name\": \"Klinik Medika Sehat\",\r\n  \"npwp\": \"12.345.678.9-012.000\",\r\n  \"email\": \"neoclinic@mail.co.id\",\r\n  \"phone\":\"0212981798\",\r\n  \"address\": \"Jl. Sudirman No. 11, Jakarta\",\r\n  \"isCorporate\": true,  // true/false\r\n  \"corporateId\": null,  // will be null if isCorporate = false or corporateName is entirely new\r\n  \"corporateName\": \"Medika Group\",  // will be null if isCorporate = false\r\n  \"namePj\": \"Guruh\",\r\n  \"emailPj\": \"mgajinugrh.work@gmail.com\",\r\n  \"phonePj\": \"+6281911744529\",\r\n  \"nameBill\": \"Guruh\",\r\n  \"emailBill\": \"mgajinugrh.work@gmail.com\",\r\n  \"phoneBill\": \"+6281911744529\",\r\n  \"nameTech\": \"Guruh\",\r\n  \"emailTech\": \"mgajinugrh.work@gmail.com\",\r\n  \"phoneTech\": \"+6281911744529\",\r\n  \"captcha\": \"test\",   // token from front‑end reCAPTCHA,\r\n  \"otp\": \"5RmxDUbds/aKaMRT43r3r692HxWepzmMHuhuv6jxGK8=\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url_neo.admin}}/faskes/register",
+									"host": [
+										"{{base_url_neo.admin}}"
+									],
+									"path": [
+										"faskes",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Activate New Faskes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_neo.admin}}/faskes/activate/1111U028.SU",
+									"host": [
+										"{{base_url_neo.admin}}"
+									],
+									"path": [
+										"faskes",
+										"activate",
+										"1111U028.SU"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				},
 				{
-					"name": "Register New Faskes",
+					"name": "Reset Password",
+					"item": [
+						{
+							"name": "Reset Password",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"otp\": \"\",\r\n    \"password\": \"\",\r\n    \"rePassword\": \"\",\r\n    \"captcha\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url_neo.admin}}/reset-password?token=",
+									"host": [
+										"{{base_url_neo.admin}}"
+									],
+									"path": [
+										"reset-password"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"item": []
+				}
+			],
+			"description": "Manage registration process for new faskes"
+		},
+		{
+			"name": "neo.preregist",
+			"item": [
+				{
+					"name": "Pre Register",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"noFaskes\": \"1111U027\",\r\n  \"name\": \"Klinik Medika Sehat\",\r\n  \"isCorporate\": false,  // true/false\r\n  \"corporateId\": null,  // will be null if isCorporate = false or corporateName is entirely new\r\n  \"corporateName\": \"Medika Group\",  // will be null if isCorporate = false\r\n  \"email\": \"<registree email>\",\r\n  \"phone\": \"<registree phone number with whatsapp>\",\r\n  \"address\": \"Jl. Sudirman No. 10, Jakarta\",\r\n  \"captchaToken\": \"test\"   // token from front‑end reCAPTCHA\r\n}",
+							"raw": "{\r\n  \"name\": \"Guruh\",\r\n  \"email\": \"mgajinugrh.work@gmail.com\",\r\n  \"phone\": \"+6281911744529\"\r\n }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -43,35 +165,35 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url_neo.admin}}/register/faskes",
+							"raw": "{{base_url_neo.preregist}}/pre-register",
 							"host": [
-								"{{base_url_neo.admin}}"
+								"{{base_url_neo.preregist}}"
 							],
 							"path": [
-								"register",
-								"faskes"
+								"pre-register"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Search Corporate (for dropdown)",
+					"name": "Verify Token",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url_neo.admin}}/corporates?q=medika",
+							"raw": "{{base_url_neo.preregist}}/pre-register/verify?token=Ogm/enOPIPFXiXiMpqWc9gpoIdST9BD7bTqIv3/xc4I=",
 							"host": [
-								"{{base_url_neo.admin}}"
+								"{{base_url_neo.preregist}}"
 							],
 							"path": [
-								"corporates"
+								"pre-register",
+								"verify"
 							],
 							"query": [
 								{
-									"key": "q",
-									"value": "medika"
+									"key": "token",
+									"value": "Ogm/enOPIPFXiXiMpqWc9gpoIdST9BD7bTqIv3/xc4I="
 								}
 							]
 						}
@@ -79,7 +201,7 @@
 					"response": []
 				}
 			],
-			"description": "Manage registration process for new faskes"
+			"description": "Handles Backend operations for pre-registered users (Landing page)"
 		}
 	]
 }

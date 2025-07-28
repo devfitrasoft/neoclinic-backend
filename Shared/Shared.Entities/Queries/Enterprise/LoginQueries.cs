@@ -4,7 +4,7 @@ using Shared.Models;
 
 namespace Shared.Entities.Queries.Enterprise
 {
-    public class LoginQueries
+    public sealed class LoginQueries
     {
         private readonly IEnterpriseDbContext _edb;
 
@@ -15,6 +15,7 @@ namespace Shared.Entities.Queries.Enterprise
 
         public async Task<Login?> GetLoginFaskesCorpByUsernameAsync(string username, CancellationToken ct)
             => await _edb.Logins.Include(l => l.Faskes)
+                                    .ThenInclude(f => f.PICs)
                                 .Include(l => l.Corporate)
                                 .FirstOrDefaultAsync(l => l.Username == username, ct);
 
@@ -32,6 +33,7 @@ namespace Shared.Entities.Queries.Enterprise
                     CorporateId = corp?.Id,
                     Email = req.Email,
                     PhoneNumber = req.Phone,
+                    IsActive = false,
                     CreatedAt = DateTime.UtcNow,
                     CreatorId = 0
                 };
@@ -52,6 +54,12 @@ namespace Shared.Entities.Queries.Enterprise
             }
 
             return login;
+        }
+
+        public async Task<int> UpdateIsActiveAsync(Login login, bool isActive, CancellationToken ct)
+        {
+            login.IsActive = isActive;
+            return await _edb.SaveChangesAsync(ct);
         }
 
         public async Task<int> UpdatePasswordAsync(long userId, string hashedPassword, CancellationToken ct)

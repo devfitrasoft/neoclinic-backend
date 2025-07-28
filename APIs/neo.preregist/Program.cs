@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using neo.preregist.Common;
 using neo.preregist.Data.Enterprise;
@@ -103,7 +104,7 @@ app.MapPost("/pre-register",
     });
 
 app.MapGet("pre-register/verify",
-    async (string token, IPreRegistFacade facade, CancellationToken ct) =>
+    async ([FromQuery] string token, IPreRegistFacade facade, CancellationToken ct) =>
     {
         var row = await facade.GetRowByTokenAsync(token, ct);
 

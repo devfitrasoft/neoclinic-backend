@@ -12,4 +12,10 @@
         Billing = 2,
         Tech = 3
     }
+
+    public enum BillingType
+    {
+        Monthly = 1,
+        Registration = 2
+    }
 }

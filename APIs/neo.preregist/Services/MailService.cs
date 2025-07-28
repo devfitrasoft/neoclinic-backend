@@ -15,11 +15,12 @@ namespace neo.preregist.Services
             _email = email;
         }
 
-        public async Task SendNotifAsync(string toEmail, string otp)
+        public async Task SendInvitationAsync(string toEmail, string otp)
         {
             var header = LocalConstants.MAIL_REGIST_TOKEN_HEADER;
 
-            var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={otp}";
+            var encodedToken = Uri.EscapeDataString(otp);
+            var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={encodedToken}";
             var otpExpiry = _cfg["OtpToken:Expiry"] ?? Constants.OTP_EXPIRY_IN_MINUTE;
 
             var html = TemplateRenderer.Render("""

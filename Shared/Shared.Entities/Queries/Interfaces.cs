@@ -52,7 +52,7 @@ namespace Shared.Entities.Queries
     public interface IBillingDbContext
     {
         DbSet<Billing> Billings { get; }
-        DbSet<BillingSetting> BillingsSettings { get; }
+        DbSet<BillingSetting> BillingSettings { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }

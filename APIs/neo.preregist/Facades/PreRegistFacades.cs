@@ -38,7 +38,7 @@ namespace neo.preregist.Facades
         {
             PreRegistResponse response = new PreRegistResponse();
             Tuple<string,DateTime> OtpAndExpiry = Tuple.Create(string.Empty, DateTime.UtcNow);
-
+            int resOTP = 0;
             try
             {
 
@@ -57,10 +57,13 @@ namespace neo.preregist.Facades
                         await _prQueries.UpdateInfoAsync(row, req, ct);
                         var otpRows = await _otpQueries.GetListOfNotYetUsedByTargetId(row.Id, OtpType.PreRegist, ct);
 
-                        if (otpRows == null) // Meaning last OTP already been used, generate new row
+                        if (otpRows == null || !otpRows.Any()) // Meaning last OTP already been used, generate new row
                         {
                             OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken :Expiry"]);
-                            await _otpQueries.AddAsync(row.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.PreRegist, ct);
+                            resOTP = await _otpQueries.AddAsync(row.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.PreRegist, ct);
+
+                            if (resOTP > 0)
+                                await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
 
                             response = GenerateResponse(PreRegistSaveResponse.Updated, true, "Updated", row.IsRegistered);
                             return response;
@@ -69,10 +72,11 @@ namespace neo.preregist.Facades
                         foreach (var otpRow in otpRows) // Meaning old OTP has yet to be used, recycle
                         {
                             OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken:Expiry"]);
-                            await _otpQueries.RenewOtpAsync(otpRow, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
+                            resOTP = await _otpQueries.RenewOtpAsync(otpRow, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
                         }
 
-                        await _mail.SendNotifAsync(req.Email, OtpAndExpiry.Item1);
+                        if(resOTP > 0)
+                            await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
 
                         response = GenerateResponse(PreRegistSaveResponse.Updated, true, "Updated", row.IsRegistered);
                     }
@@ -84,10 +88,11 @@ namespace neo.preregist.Facades
 
                 //  3. Store the Pre-registration data along with Otp
                 var newPreRegist = await _prQueries.AddAsync(req, ct);
-                await _otpQueries.AddAsync(newPreRegist.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.PreRegist, ct);
+                resOTP = await _otpQueries.AddAsync(newPreRegist.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.PreRegist, ct);
 
                 //  4. Send Mail/Whatsapp to the user
-                await _mail.SendNotifAsync(req.Email, OtpAndExpiry.Item1);  //  later would add the whatsapp here
+                if(newPreRegist != null && resOTP > 0)
+                    await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);  //  later would add the whatsapp here
             }
             catch (Exception ex)
             {

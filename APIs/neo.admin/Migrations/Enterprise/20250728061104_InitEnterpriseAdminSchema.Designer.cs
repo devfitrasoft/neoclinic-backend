@@ -12,7 +12,7 @@ using neo.admin.Data.Enterprise;
 namespace neo.admin.Migrations.Enterprise
 {
     [DbContext(typeof(EnterpriseDbContext))]
-    [Migration("20250726081248_InitEnterpriseAdminSchema")]
+    [Migration("20250728061104_InitEnterpriseAdminSchema")]
     partial class InitEnterpriseAdminSchema
     {
         /// <inheritdoc />
@@ -66,11 +66,15 @@ namespace neo.admin.Migrations.Enterprise
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("AmountDue")
+                    b.Property<decimal?>("AmountDue")
                         .HasColumnType("numeric")
                         .HasColumnName("amount_due");
 
-                    b.Property<DateTime>("DueDate")
+                    b.Property<int>("BillingType")
+                        .HasColumnType("integer")
+                        .HasColumnName("billing_type");
+
+                    b.Property<DateTime?>("DueDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
 
@@ -78,31 +82,31 @@ namespace neo.admin.Migrations.Enterprise
                         .HasColumnType("bigint")
                         .HasColumnName("faskes_id");
 
-                    b.Property<DateTime>("GraceEndDate")
+                    b.Property<DateTime?>("GraceEndDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("grace_end_date");
 
-                    b.Property<decimal>("GracePenalty")
+                    b.Property<decimal?>("GracePenalty")
                         .HasColumnType("numeric")
                         .HasColumnName("grace_penalty");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<bool>("IsPaid")
                         .HasColumnType("boolean")
                         .HasColumnName("is_paid");
 
-                    b.Property<bool>("IsSoftDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_soft_deleted");
-
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("payment_date");
 
-                    b.Property<DateTime>("PeriodEnd")
+                    b.Property<DateTime?>("PeriodEnd")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("period_end");
 
-                    b.Property<DateTime>("PeriodStart")
+                    b.Property<DateTime?>("PeriodStart")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("period_start");
 
@@ -110,11 +114,11 @@ namespace neo.admin.Migrations.Enterprise
                         .HasColumnType("numeric")
                         .HasColumnName("sum_grace_penalty");
 
-                    b.Property<DateTime>("SuspensionDate")
+                    b.Property<DateTime?>("SuspensionDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("suspension_date");
 
-                    b.Property<long>("TransactionCount")
+                    b.Property<long?>("TransactionCount")
                         .HasColumnType("bigint")
                         .HasColumnName("transaction_count");
 

@@ -5,7 +5,7 @@ using Shared.Models;
 
 namespace Shared.Entities.Queries.Enterprise
 {
-    public class PreRegistQueries
+    public sealed class PreRegistQueries
     {
         private readonly ILogger _logger;
         private readonly IPreRegistDbContext _edb;

@@ -29,7 +29,7 @@ namespace Shared.Entities.Objs.Enterprise
         [Column("corporate_id")] public long? CorporateId { get; set; }
         public Corporate? Corporate { get; set; }
 
-        [Column("is_active")] public bool IsActive { get; set; } = true;
+        [Column("is_active")] public bool IsActive { get; set; } = false;
         [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
         [Column("registered_date")] public DateTime RegisteredDate { get; set; }
         [Column("created_at")] public DateTime CreatedAt { get; set; }

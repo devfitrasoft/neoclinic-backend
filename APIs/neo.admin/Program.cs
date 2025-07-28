@@ -67,6 +67,8 @@ b.Services.AddScoped<FaskesQueries>();
 b.Services.AddScoped<CorporateQueries>();
 b.Services.AddScoped<OtpTokenQueries>();
 b.Services.AddScoped<PreRegistQueries>();
+b.Services.AddScoped<BillingSettingQueries>();
+b.Services.AddScoped<BillingQueries>();
 
 /*  Load facades    */
 b.Services.AddScoped<IRegistrationFacade, RegistrationFacade>();

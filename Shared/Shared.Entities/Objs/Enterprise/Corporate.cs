@@ -12,7 +12,7 @@ namespace Shared.Entities.Objs.Enterprise
         [Required, MaxLength(255), Column("name")]
         public string Name { get; set; } = null!;     // store upper‑case in code or via trigger
 
-        [Column("is_active")] public bool IsActive { get; set; } = true;
+        [Column("is_active")] public bool IsActive { get; set; } = false;
         [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
 
         [Column("created_at")] public DateTime CreatedAt { get; set; }

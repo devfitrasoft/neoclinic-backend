@@ -32,17 +32,16 @@ namespace neo.admin.Services
                 html);
         }
 
-        public Task SendRegistrationFeeAsync(string toEmail, string faskesName)
+        public Task SendRegistrationFeeAsync(string toEmail, string faskesName, decimal registrationFee)
         {
-            decimal fee = _regSettings.Fee;
             string rekening = _regSettings.BankAccountNumber;
             string phone = _regSettings.ConfirmPaymentPhoneNumber;
 
             var html = TemplateRenderer.Render("""
             <h2>Registrasi Hampir Selesai!</h2>
-            <p>Silahkan lakukan pembayaran sebesar Rp.{{ fee }} melalui rekening {{ rekening }}</p>
+            <p>Silahkan lakukan pembayaran sebesar Rp.{{ registrationFee }} melalui rekening {{ rekening }}</p>
             <p>dan konfirmasikan melalui WhatsApp di nomor {{ phone }}.</p>
-            """, new { fee, rekening, phone });
+            """, new { registrationFee, rekening, phone });
 
             return _email.SendAsync(toEmail,
                 $"Konfirmasi Pembayaran akun NeoClinic - {faskesName}",

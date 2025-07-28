@@ -23,7 +23,7 @@ namespace Shared.Entities.Objs.Enterprise
         [Required, Column("pic_type")]
         public PICCType PICType { get; set; }
 
-        [Column("is_active")] public bool IsActive { get; set; } = true;
+        [Column("is_active")] public bool IsActive { get; set; } = false;
         [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
         [Column("created_at")] public DateTime CreatedAt { get; set; }
         [Column("creator_id")] public long CreatorId { get; set; }
