@@ -95,7 +95,7 @@ namespace neo.admin.Facades
             bool preExisted = false;
             bool success = false;
             // 2. Lookup faskesQry by NoFaskes
-            var faskes = await _faskesQry.GetAsync(req.NoFaskes, ct);
+            var faskes = await _faskesQry.GetNotDeletedAsync(req.NoFaskes, ct);
 
             if (faskes == null)
             {

@@ -9,7 +9,7 @@ namespace Shared.Entities.Queries.Enterprise
         private readonly IEnterpriseDbContext _db;
         public CorporateQueries(IEnterpriseDbContext db) => _db = db;
 
-        public Task<List<CorporateLookupItem>> SearchAsync(string term, CancellationToken ct) =>
+        public Task<List<CorporateLookupItem>> SearchNotDeletedAsync(string term, CancellationToken ct) =>
             _db.Corporates
                .Where(c => !c.IsDeleted && EF.Functions.ILike(c.Name, $"%{term}%"))
                .Select(c => new CorporateLookupItem(c.Id, c.Name))
