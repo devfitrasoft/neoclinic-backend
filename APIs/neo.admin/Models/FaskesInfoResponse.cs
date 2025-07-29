@@ -1,6 +1,15 @@
-﻿namespace neo.admin.Models
+﻿using Shared.Models;
+using System.Text.Json.Serialization;
+
+namespace neo.admin.Models
 {
-    public sealed record FaskesInfoResponse(
+    public sealed class FaskesInfoResponse : CommonAPIBodyResponse
+    {
+        [JsonPropertyName("data")]
+        public IEnumerable<FaskesInfoResponseData> Data { get; set; } = new List<FaskesInfoResponseData>();
+    }
+
+    public sealed record FaskesInfoResponseData(
     long Id,
     string Name,
     string Email,

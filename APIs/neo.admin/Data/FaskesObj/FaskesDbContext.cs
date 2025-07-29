@@ -1,10 +1,11 @@
 ﻿// APIs/neo.admin/Data/Clinic/FaskesDbContext.cs
 using Microsoft.EntityFrameworkCore;
-using neo.admin.Data.FaskesObj.Entities;
+using Shared.Entities.Objs.FaskesObj;
+using Shared.Entities.Queries;
 
 namespace neo.admin.Data.FaskesObj;
 
-public class FaskesDbContext : DbContext
+public class FaskesDbContext : DbContext, IFaskesDbContext
 {
     public FaskesDbContext(DbContextOptions<FaskesDbContext> options) : base(options) { }
 

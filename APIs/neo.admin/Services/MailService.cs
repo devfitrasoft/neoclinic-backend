@@ -17,31 +17,31 @@ namespace neo.admin.Services
             _regSettings = regSettings.Value;
         }
 
-        public Task SendInviteAsync(string toEmail, long faskesId, long loginId)
+        public Task SendInviteAsync(string toEmail, string loginUsername, Tuple<string,DateTime> token)
         {
-            var link = $"{_cfg["App:RegisterWebUrl"]}/setup-su?f={faskesId}&u={loginId}";
+            var link = $"{_cfg["App:RegisterWebUrl"]}/reset-password?token={token.Item1}";
+            var safeUsername = loginUsername.Replace(".", "&#8203;.");
             var html = TemplateRenderer.Render("""
             <h2>Selamat datang di NeoClinic</h2>
-            <p>Akun Super User Anda hampir siap. Klik tautan di bawah untuk membuat kata sandi:</p>
+            <p>Akun Super User Anda (<b>{{ loginUsername }}</b>) hampir siap. Klik tautan di bawah untuk membuat kata sandi:</p>
             <p><a href="{{ link }}">Setel Kata Sandi</a></p>
-            """, new { link });
+            """, new { loginUsername = safeUsername, link });
 
             return _email.SendAsync(toEmail,
                 "Aktivasi akun NeoClinic",
                 html);
         }
 
-        public Task SendConfirmPaymentReminder(string toEmail, string faskesName)
+        public Task SendRegistrationFeeAsync(string toEmail, string faskesName, decimal registrationFee)
         {
-            decimal fee = _regSettings.Fee;
             string rekening = _regSettings.BankAccountNumber;
             string phone = _regSettings.ConfirmPaymentPhoneNumber;
 
             var html = TemplateRenderer.Render("""
             <h2>Registrasi Hampir Selesai!</h2>
-            <p>Silahkan lakukan pembayaran sebesar Rp.{{ fee }} melalui rekening {{ rekening }}</p>
+            <p>Silahkan lakukan pembayaran sebesar Rp.{{ registrationFee }} melalui rekening {{ rekening }}</p>
             <p>dan konfirmasikan melalui WhatsApp di nomor {{ phone }}.</p>
-            """, new { fee, rekening, phone });
+            """, new { registrationFee, rekening, phone });
 
             return _email.SendAsync(toEmail,
                 $"Konfirmasi Pembayaran akun NeoClinic - {faskesName}",

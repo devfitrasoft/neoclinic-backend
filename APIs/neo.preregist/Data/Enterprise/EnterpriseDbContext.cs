@@ -1,13 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using neo.preregist.Data.Enterprise.Entities;
+using Shared.Entities.Objs.Enterprise;
+using Shared.Entities.Queries;
 
 namespace neo.preregist.Data.Enterprise
 {
-    public class EnterpriseDbContext : DbContext
+    public class EnterpriseDbContext : DbContext, IPreRegistDbContext, IOtpTokenDbContext
     {
         public EnterpriseDbContext(DbContextOptions<EnterpriseDbContext> options) : base(options) { }
 
         public DbSet<PreRegist> PreRegists => Set<PreRegist>();
+        public DbSet<OtpToken> OtpTokens => Set<OtpToken>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -18,11 +20,11 @@ namespace neo.preregist.Data.Enterprise
             {
                 e.Property(x => x.Id)
                  .UseIdentityByDefaultColumn();              // auto‑increment (bigserial)
+            });
 
-                e.Property(x => x.PreferredContact)
-                 .HasColumnType("smallint");
-
-                e.Property(x => x.ProductType)
+            b.Entity<OtpToken>(e =>
+            {
+                e.Property(o => o.Type)
                  .HasColumnType("smallint");
             });
         }

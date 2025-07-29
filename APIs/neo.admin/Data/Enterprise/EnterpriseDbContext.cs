@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using neo.admin.Data.Enterprise.Entities;
+using Shared.Entities.Objs.Enterprise;
+using Shared.Entities.Queries;
 
 namespace neo.admin.Data.Enterprise
 {
-    public class EnterpriseDbContext : DbContext
+    public class EnterpriseDbContext : DbContext, IEnterpriseDbContext, IPreRegistDbContext, 
+        IOtpTokenDbContext, IBillingDbContext, IPICDbContext
     {
         public EnterpriseDbContext(DbContextOptions<EnterpriseDbContext> options) : base(options) { }
 
@@ -11,6 +13,14 @@ namespace neo.admin.Data.Enterprise
         public DbSet<Faskes> Faskeses => Set<Faskes>();   // EF pluralises badly, explicit set
         public DbSet<Login> Logins => Set<Login>();
         public DbSet<ConnString> ConnStrings => Set<ConnString>();
+        public DbSet<PreRegist> PreRegists => Set<PreRegist>();
+        public DbSet<OtpToken> OtpTokens => Set<OtpToken>();
+        public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
+
+        public DbSet<Billing> Billings => Set<Billing>();
+        public DbSet<BillingSetting> BillingSettings => Set<BillingSetting>();
+
+        public DbSet<PIC> PICs => Set<PIC>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -37,6 +47,16 @@ namespace neo.admin.Data.Enterprise
                   .WithMany(c => c.Faskes)
                   .HasForeignKey(f => f.CorporateId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasMany(f => f.Billings)
+                 .WithOne(b => b.Faskes)
+                 .HasForeignKey(b => b.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasMany(f => f.PICs)
+                 .WithOne(p => p.Faskes)
+                 .HasForeignKey(b => b.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ---- sys_login -------------------------------------
@@ -71,6 +91,42 @@ namespace neo.admin.Data.Enterprise
                 e.HasOne(x => x.Login)
                  .WithMany()
                  .HasForeignKey(x => x.LoginId);
+            });
+
+            // ---- sys_billing ------------------------------------
+            b.Entity<Billing>(e => 
+            { 
+                e.Property(x => x.Id) 
+                 .UseIdentityByDefaultColumn();
+
+                e.HasOne(b => b.Faskes)
+                 .WithMany(f => f.Billings)
+                 .HasForeignKey(b => b.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ---- sys_billing_setting ----------------------------
+            b.Entity<BillingSetting>(e =>
+            {
+                e.Property(s => s.Id)
+                 .UseIdentityByDefaultColumn();
+
+                e.HasIndex(s => s.IsActive); // for easy lookup of current active rule
+            });
+
+            // ---- sys_pic ----------------------------------------
+            b.Entity<PIC>(e =>
+            {
+                e.Property(x => x.Id)
+                 .UseIdentityByDefaultColumn();
+
+                e.Property(x => x.PICType)
+                 .HasColumnType("smallint");
+
+                e.HasOne(p => p.Faskes)
+                 .WithMany(f => f.PICs)
+                 .HasForeignKey(p => p.FaskesId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

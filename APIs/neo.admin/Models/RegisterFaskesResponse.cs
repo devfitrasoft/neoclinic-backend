@@ -1,6 +1,13 @@
-﻿namespace neo.admin.Models
+﻿using Shared.Models;
+
+namespace neo.admin.Models
 {
-    public sealed record RegisterFaskesResponse(
+    public sealed class RegisterFaskesResponse : CommonAPIBodyResponse
+    {
+        public IEnumerable<RegisterFaskesResponseData> Data { get ; set; } = new List<RegisterFaskesResponseData>();
+    }
+
+    public sealed record RegisterFaskesResponseData(
         bool isRegistered,
         bool preExisted
     );
