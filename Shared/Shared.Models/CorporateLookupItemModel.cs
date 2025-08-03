@@ -1,6 +1,6 @@
 ﻿namespace Shared.Models
 {
-    public sealed record CorporateLookupItem(
+    public sealed record CorporateLookupItemModel(
     long Id,
     string Name);
 }

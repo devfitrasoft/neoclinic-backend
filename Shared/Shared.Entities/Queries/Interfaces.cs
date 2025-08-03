@@ -14,6 +14,7 @@ namespace Shared.Entities.Queries
         DbSet<AuthSession> AuthSessions { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
+        Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default);
     }
 
     public interface IPreRegistDbContext

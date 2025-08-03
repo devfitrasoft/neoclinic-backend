@@ -42,9 +42,12 @@ namespace Shared.Entities.Queries.Enterprise
             return faskes;
         }
 
-        public async Task<int> UpdateIsActiveAsync(Faskes faskes, bool isActive, CancellationToken ct)
+        public async Task<int> ActivateAsync(Faskes faskes, CancellationToken ct)
         {
-            faskes.IsActive = isActive;
+            if (faskes.IsActive && !faskes.IsDeleted) return 1;
+
+            faskes.IsActive = true;
+            faskes.IsDeleted = false;
             return await _db.SaveChangesAsync(ct);
         }
     }

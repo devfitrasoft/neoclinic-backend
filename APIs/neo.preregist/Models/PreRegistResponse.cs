@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace neo.preregist.Models
 {
-    public class PreRegistResponse : CommonAPIBodyResponse
+    public class PreRegistResponse : CommonAPIBodyResponseModel
     {
         [JsonPropertyName("data")]
         public IEnumerable<PreRegistResponseData> Data { get; set; } = new List<PreRegistResponseData>();

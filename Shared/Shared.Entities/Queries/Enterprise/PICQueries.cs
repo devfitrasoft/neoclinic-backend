@@ -29,9 +29,12 @@ namespace Shared.Entities.Queries.Enterprise
             return entity;
         }
 
-        public async Task<int> UpdateIsActiveAsync(PIC pic, bool isActive, CancellationToken ct)
+        public async Task<int> ActivateAsync(PIC pic, CancellationToken ct)
         {
-            pic.IsActive = isActive;
+            if (pic.IsActive && !pic.IsDeleted) return 1;
+
+            pic.IsActive = true;
+            pic.IsDeleted = false;
             return await _edb.SaveChangesAsync(ct);
         }
 

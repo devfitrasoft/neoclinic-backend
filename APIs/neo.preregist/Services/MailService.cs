@@ -21,7 +21,7 @@ namespace neo.preregist.Services
 
             var encodedToken = Uri.EscapeDataString(otp);
             var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={encodedToken}";
-            var otpExpiry = _cfg["OtpToken:Expiry"] ?? Constants.OTP_EXPIRY_IN_MINUTE;
+            var otpExpiry = _cfg.GetValue<int>("OtpToken:Expiry");
 
             var html = TemplateRenderer.Render("""
             <p>Terimakasih telah memilih NeoClinic!</p>

@@ -59,7 +59,7 @@ namespace neo.preregist.Facades
 
                         if (otpRows == null || !otpRows.Any()) // Meaning last OTP already been used, generate new row
                         {
-                            OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken :Expiry"]);
+                            OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg.GetValue<int>("JwtToken:RefreshExpiry"));
                             resOTP = await _otpQueries.AddAsync(row.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.PreRegist, ct);
 
                             if (resOTP > 0)
@@ -71,7 +71,7 @@ namespace neo.preregist.Facades
 
                         foreach (var otpRow in otpRows) // Meaning old OTP has yet to be used, recycle
                         {
-                            OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken:Expiry"]);
+                            OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg.GetValue<int>("JwtToken:RefreshExpiry"));
                             resOTP = await _otpQueries.RenewOtpAsync(otpRow, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
                         }
 
@@ -84,7 +84,7 @@ namespace neo.preregist.Facades
                 }
 
                 //  2. Generate Otp character varying(255)
-                OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken:Expiry"]);
+                OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg.GetValue<int>("JwtToken:RefreshExpiry"));
 
                 //  3. Store the Pre-registration data along with Otp
                 var newPreRegist = await _prQueries.AddAsync(req, ct);

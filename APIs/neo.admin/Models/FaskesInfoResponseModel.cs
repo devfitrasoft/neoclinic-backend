@@ -3,13 +3,13 @@ using System.Text.Json.Serialization;
 
 namespace neo.admin.Models
 {
-    public sealed class FaskesInfoResponse : CommonAPIBodyResponse
+    public sealed class FaskesInfoResponseModel : CommonAPIBodyResponseModel
     {
         [JsonPropertyName("data")]
-        public IEnumerable<FaskesInfoResponseData> Data { get; set; } = new List<FaskesInfoResponseData>();
+        public IEnumerable<FaskesInfoResponseDataModel> Data { get; set; } = new List<FaskesInfoResponseDataModel>();
     }
 
-    public sealed record FaskesInfoResponseData(
+    public sealed record FaskesInfoResponseDataModel(
     long Id,
     string Name,
     string Email,

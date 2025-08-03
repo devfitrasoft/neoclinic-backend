@@ -6,11 +6,11 @@ namespace Shared.Common
 {
     public class Utilities
     {
-        public static Tuple<string, DateTime> DoGenerateHashedOtp(string expiryInMinutes)
+        public static Tuple<string, DateTime> DoGenerateHashedOtp(int expiryInMinutes)
         {
             string plainOtp = GenerateOtp();
             string hashedOtp = HashOtp(plainOtp);
-            var otpExpiryMinutes = int.Parse(expiryInMinutes ?? Constants.OTP_EXPIRY_IN_MINUTE);
+            var otpExpiryMinutes = expiryInMinutes;
             var expiresAt = DateTime.UtcNow.AddMinutes(otpExpiryMinutes);
 
             return Tuple.Create(hashedOtp, expiresAt);
