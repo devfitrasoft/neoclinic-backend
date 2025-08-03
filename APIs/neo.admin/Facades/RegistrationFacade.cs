@@ -13,7 +13,7 @@ namespace neo.admin.Facades
 {
     public interface IRegistrationFacade
     {
-        Task<RegisterFaskesResponseModel> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct);
+        Task<RegisterFaskesResponseModel> RegisterAsync(string otp, RegisterFaskesRequest req, CancellationToken ct);
         Task<bool> ActivateFaskesAsync(string loginUsername, CancellationToken ct = default);
     }
 
@@ -75,9 +75,9 @@ namespace neo.admin.Facades
         /// <param name="ct"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<RegisterFaskesResponseModel> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct)
+        public async Task<RegisterFaskesResponseModel> RegisterAsync(string otp, RegisterFaskesRequest req, CancellationToken ct)
         {
-            int resOtpUsage = await _otpQry.MarkIsUsedAsync(req.Otp, OtpType.PreRegist, ct);
+            int resOtpUsage = await _otpQry.MarkIsUsedAsync(otp, OtpType.PreRegist, ct);
 
             if (resOtpUsage == 0)
                 return new RegisterFaskesResponseModel()

@@ -149,7 +149,8 @@ app.MapGet("/corporates",
 
 /* 3. POST register faskes */
 app.MapPost("/faskes/register",
-    async ([FromBody] RegisterFaskesRequest req,
+    async ([FromQuery] string otp,
+           [FromBody] RegisterFaskesRequest req,
            IRegistrationFacade facade,
            CancellationToken ct) =>
     {
@@ -163,7 +164,7 @@ app.MapPost("/faskes/register",
                 Message = StringParser.ValidationErrorMessageBuilder(validationResults)
             }, statusCode: StatusCodes.Status400BadRequest);
 
-        var res = await facade.RegisterAsync(req, ct);
+        var res = await facade.RegisterAsync(otp, req, ct);
         return Results.Json(res, statusCode: StatusCodes.Status201Created);
     });
 

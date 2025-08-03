@@ -60,8 +60,5 @@ namespace Shared.Models
 
         [JsonPropertyName("captcha"), Required]
         public string CaptchaToken { get; init; } = null!;
-
-        [JsonPropertyName("otp"), Required]
-        public string Otp { get; init; } = null!;
     }
 }
