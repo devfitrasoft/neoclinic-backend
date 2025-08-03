@@ -262,6 +262,12 @@ namespace neo.admin.Migrations.Enterprise
                         .HasColumnType("bigint")
                         .HasColumnName("creator_id");
 
+                    b.Property<string>("EmailOwner")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("owner_email");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -275,6 +281,18 @@ namespace neo.admin.Migrations.Enterprise
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
+
+                    b.Property<string>("NameOwner")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("owner_name");
+
+                    b.Property<string>("PhoneOwner")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("owner_phone");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

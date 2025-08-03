@@ -22,9 +22,6 @@ namespace Shared.Models
         [JsonPropertyName("address"), Required]
         public string Address { get; init; } = null!;
 
-        [JsonPropertyName("isCorporate"), Required]
-        public bool IsCorporate { get; init; }
-
         [JsonPropertyName("corporateName")]
         public string? CorporateName { get; init; }
 

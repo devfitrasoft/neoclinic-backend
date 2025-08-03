@@ -12,6 +12,15 @@ namespace Shared.Entities.Objs.Enterprise
         [Required, MaxLength(255), Column("name")]
         public string Name { get; set; } = null!;     // store upper‑case in code or via trigger
 
+        [Required, MaxLength(255), Column("owner_name")]
+        public string NameOwner { get; set; } = null!;
+
+        [Required, MaxLength(255), Column("owner_email")]
+        public string EmailOwner { get; set; } = null!;
+
+        [Required, MaxLength(20), Column("owner_phone")]
+        public string PhoneOwner { get; set; } = null!;
+
         [Column("is_active")] public bool IsActive { get; set; } = false;
         [Column("is_deleted")] public bool IsDeleted { get; set; } = false;
 

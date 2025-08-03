@@ -106,13 +106,11 @@ namespace neo.admin.Facades
 
             // 1. Upsert corpQry (only if corpQry mode is on)
             Corporate? corp = null;
-            if (req.IsCorporate)
-            {
-                corp = req.CorporateId != null
+            corp = req.CorporateId != null
                     ? await _corpQry.GetByIdAsync(req.CorporateId.Value, ct)
-                    : await _corpQry.CreateCorporateIfMissing(req.CorporateName!, ct);
-            }
-            bool resCorp = req.IsCorporate ? corp != null : true;
+                    : await _corpQry.CreateCorporateIfMissing(req.CorporateName!, req.NamePj, req.EmailPj, req.PhonePj, ct);
+
+            bool resCorp = corp != null;
 
             bool success = false;
             // 2. Lookup faskesQry by NoFaskes

@@ -8,7 +8,7 @@
 
     public enum PICCType
     {
-        PJ = 1,
+        PJ = 1, // general manager/director
         Billing = 2,
         Tech = 3
     }
