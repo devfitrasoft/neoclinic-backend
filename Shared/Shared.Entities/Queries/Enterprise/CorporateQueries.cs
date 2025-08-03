@@ -18,7 +18,7 @@ namespace Shared.Entities.Queries.Enterprise
         public async Task<Corporate?> GetByIdAsync(long id, CancellationToken ct) =>
             await _db.Corporates.FindAsync([id], ct);
 
-        public async Task<Corporate> CreateCorporateIfMissing(string name, CancellationToken ct)
+        public async Task<Corporate> CreateCorporateIfMissing(string name, string nameOwner, string mailOwner, string phoneOwner, CancellationToken ct)
         {
             var upper = name.ToUpperInvariant();
 
@@ -30,6 +30,9 @@ namespace Shared.Entities.Queries.Enterprise
             corp = new Corporate
             {
                 Name = upper,
+                NameOwner = nameOwner,
+                EmailOwner = mailOwner,
+                PhoneOwner = phoneOwner,
                 CreatedAt = DateTime.UtcNow,
                 CreatorId = 0
             };

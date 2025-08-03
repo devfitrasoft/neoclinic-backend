@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -55,6 +54,9 @@ namespace neo.admin.Migrations.Enterprise
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    owner_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    owner_email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    owner_phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
