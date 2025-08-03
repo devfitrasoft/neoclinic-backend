@@ -8,18 +8,22 @@ namespace neo.admin.Services
     {
         private readonly IEmailSender _email;
         private readonly IConfiguration _cfg;
-        private readonly RegistrationSettings _regSettings;
+        private readonly RegistrationSettingsModel _regSettings;
 
-        public MailService( IConfiguration cfg, IEmailSender email, IOptions<RegistrationSettings> regSettings)
+        public MailService( IConfiguration cfg, IEmailSender email, IOptions<RegistrationSettingsModel> regSettings)
         {
             _cfg = cfg;
             _email = email;
             _regSettings = regSettings.Value;
         }
 
-        public Task SendInviteAsync(string toEmail, string loginUsername, Tuple<string,DateTime> token)
+        public Task SendInviteAsync(string toEmail, string loginUsername, Tuple<string,DateTime> otp)
         {
-            var link = $"{_cfg["App:RegisterWebUrl"]}/reset-password?token={token.Item1}";
+
+            var encodedToken = Uri.EscapeDataString(otp.Item1);
+            var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={encodedToken}";
+            int otpExpiry = _cfg.GetValue<int>("OtpToken:Expiry");
+
             var safeUsername = loginUsername.Replace(".", "&#8203;.");
             var html = TemplateRenderer.Render("""
             <h2>Selamat datang di NeoClinic</h2>

@@ -2,7 +2,7 @@
 
 namespace Shared.Models
 {
-    public class CommonAPIBodyResponse
+    public class CommonAPIBodyResponseModel
     {
         [JsonPropertyName("success")]
         public bool Success { get; set; }

@@ -20,8 +20,10 @@ namespace neo.admin.Migrations.Enterprise
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     login_id = table.Column<long>(type: "bigint", nullable: false),
                     refresh_token_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    device_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    user_agent = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
                     issued_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    expired_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    last_active_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

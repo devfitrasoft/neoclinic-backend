@@ -37,5 +37,8 @@ namespace Shared.Entities.Queries.Enterprise
                 return 1;
             }
         }
+
+        public async Task<ConnString?> GetByLoginId(long loginId, CancellationToken ct)
+            => await _edb.ConnStrings.FirstOrDefaultAsync(r => r.LoginId == loginId, ct);
     }
 }

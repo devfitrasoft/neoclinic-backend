@@ -1,6 +1,6 @@
 ﻿namespace neo.admin.Models
 {
-    public class RegistrationSettings
+    public class RegistrationSettingsModel
     {
         public decimal Fee { get; init; }
         public string BankAccountNumber { get; init; } = string.Empty;

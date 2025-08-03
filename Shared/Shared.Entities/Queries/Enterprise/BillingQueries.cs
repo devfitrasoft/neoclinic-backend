@@ -26,6 +26,8 @@ namespace Shared.Entities.Queries.Enterprise
 
         public async Task<int> MarkIsPaidTrueAsync(Billing billing, CancellationToken ct)
         {
+            if (billing.IsPaid) return 1;
+
             billing.IsPaid = true;
             return await _db.SaveChangesAsync(ct);
         }

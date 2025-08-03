@@ -31,13 +31,19 @@ namespace neo.admin.Migrations.Enterprise
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime>("ExpiredAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expired_at");
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("device_id");
 
                     b.Property<DateTime>("IssuedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("issued_at");
+
+                    b.Property<DateTime>("LastActiveAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_active_at");
 
                     b.Property<long>("LoginId")
                         .HasColumnType("bigint")
@@ -48,6 +54,11 @@ namespace neo.admin.Migrations.Enterprise
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("refresh_token_hash");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("user_agent");
 
                     b.HasKey("Id");
 

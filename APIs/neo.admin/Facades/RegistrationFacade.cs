@@ -13,7 +13,7 @@ namespace neo.admin.Facades
 {
     public interface IRegistrationFacade
     {
-        Task<RegisterFaskesResponseData> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct);
+        Task<RegisterFaskesResponseModel> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct);
         Task<bool> ActivateFaskesAsync(string loginUsername, CancellationToken ct = default);
     }
 
@@ -75,12 +75,34 @@ namespace neo.admin.Facades
         /// <param name="ct"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<RegisterFaskesResponseData> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct)
+        public async Task<RegisterFaskesResponseModel> RegisterAsync(RegisterFaskesRequest req, CancellationToken ct)
         {
-            await _otpQry.MarkIsUsedAsync(req.Otp, OtpType.PreRegist, ct);
+            int resOtpUsage = await _otpQry.MarkIsUsedAsync(req.Otp, OtpType.PreRegist, ct);
+
+            if (resOtpUsage == 0)
+                return new RegisterFaskesResponseModel()
+                {
+                    Success = false,
+                    Message = "Invalid OTP",
+                    Data = new List<RegisterFaskesResponseDataModel>(),
+                };
+
+            if (resOtpUsage == 2)
+                return new RegisterFaskesResponseModel()
+                {
+                    Success = false,
+                    Message = "OTP has been used",
+                    Data = new List<RegisterFaskesResponseDataModel>(),
+                };
 
             if (!await _captcha.VerifyAsync(req.CaptchaToken, ct))
-                _logger.LogError("RegisterAsync: CAPTCHA failed");
+                return new RegisterFaskesResponseModel()
+                {
+                    Success = false,
+                    Message = "CAPTCHA verification failed",
+                    Data = new List<RegisterFaskesResponseDataModel>(),
+                };
+            _logger.LogError("RegisterAsync: CAPTCHA failed");
 
             // 1. Upsert corpQry (only if corpQry mode is on)
             Corporate? corp = null;
@@ -92,10 +114,9 @@ namespace neo.admin.Facades
             }
             bool resCorp = req.IsCorporate ? corp != null : true;
 
-            bool preExisted = false;
             bool success = false;
             // 2. Lookup faskesQry by NoFaskes
-            var faskes = await _faskesQry.GetAsync(req.NoFaskes, ct);
+            var faskes = await _faskesQry.GetNotDeletedAsync(req.NoFaskes, ct);
 
             if (faskes == null)
             {
@@ -103,8 +124,18 @@ namespace neo.admin.Facades
             }
             else
             {
-                success = preExisted = true;  // mark this faskesQry as pre-existed
-                return new RegisterFaskesResponseData(success, preExisted);
+                return new RegisterFaskesResponseModel()
+                {
+                    Success = true,
+                    Message = "Faskes already exist",
+                    Data = new List<RegisterFaskesResponseDataModel>
+                    {
+                        new RegisterFaskesResponseDataModel(
+                            isRegistered: faskes.IsActive,
+                            preExisted: true
+                        )
+                    }
+                };
             }
 
             // 3. Insert all PICs (PJ, Billing, Technical)
@@ -113,8 +144,7 @@ namespace neo.admin.Facades
             var addTechPICRes = await _picQry.AddAsync(faskes.Id, req.NameTech, req.EmailTech, req.PhoneTech, PICCType.Tech, ct);
 
             // 4. Create SU login if it doesn't already exist
-            string username = $"{faskes.NoFaskes}.SU";
-            var login = await _loginQry.GenerateNewLoginIfNotExist(username, req, faskes, corp, ct);
+            var login = await _loginQry.GenerateFaskesSUIfNotExist(faskes.NoFaskes, req, faskes, corp, ct);
 
             // 5. Create new registration billing
             var billingSetting = await _billingSettingQry.GetOrCreateActiveBillingSettingAsync(ct);
@@ -127,7 +157,18 @@ namespace neo.admin.Facades
             success = IsRegistrationSuccessful(resCorp, faskes.Id, addPjPICRes.Id, addBillPICRes.Id, 
                 addTechPICRes.Id, login.Id, billingSetting.Id, registerBilling.Id);
 
-            return new RegisterFaskesResponseData(success, preExisted);
+            return new RegisterFaskesResponseModel()
+            {
+                Success = success,
+                Message = "New faskes Created",
+                Data = new List<RegisterFaskesResponseDataModel>
+                    {
+                        new RegisterFaskesResponseDataModel(
+                            isRegistered: false,
+                            preExisted: false
+                        )
+                    }
+            };
         }
     
         public async Task<bool> ActivateFaskesAsync(string loginUsername, CancellationToken ct = default)
@@ -137,7 +178,7 @@ namespace neo.admin.Facades
             string noFaskes = segments[0]; 
 
             /* 2. fetch login & faskesQry */
-            var login = await _loginQry.GetLoginFaskesCorpByUsernameAsync(loginUsername, ct);
+            var login = await _loginQry.GetWithFaskesCorpByUsernameAsync(loginUsername, ct);
 
             if (login == null) 
             {
@@ -182,15 +223,15 @@ namespace neo.admin.Facades
             int resUpdatePreRegist = picPJ == null ? 0 : await _preRegistQry.UpdatePreRegisteredFlagAsync(picPJ.Email, picPJ.Phone, ct);
 
             /* 7. update is_active for super user, faskes, corporate (if exist) and all PICs */
-            int resIsActiveLogin = await _loginQry.UpdateIsActiveAsync(login, true, ct);
-            int resIsActiveFaskes = await _faskesQry.UpdateIsActiveAsync(faskes, true, ct);
-            int resIsActiveCorporate = faskes.Corporate == null ? 1 : await _corpQry.UpdateIsActiveAsync(faskes.Corporate, true, ct);
-            int resIsActivePicPJ = picPJ == null ? 0 : await _picQry.UpdateIsActiveAsync(picPJ, true, ct);
-            int resIsActivatePicBilling = picBilling == null ? 0 : await _picQry.UpdateIsActiveAsync(picBilling, true, ct);
-            int resIsActivatePicTech = picTech == null ? 0 : await _picQry.UpdateIsActiveAsync(picTech, true, ct);
+            int resIsActiveLogin = await _loginQry.ActivateAsync(login, ct);
+            int resIsActiveFaskes = await _faskesQry.ActivateAsync(faskes, ct);
+            int resIsActiveCorporate = faskes.Corporate == null ? 1 : await _corpQry.ActivateAsync(faskes.Corporate, ct);
+            int resIsActivePicPJ = picPJ == null ? 0 : await _picQry.ActivateAsync(picPJ, ct);
+            int resIsActivatePicBilling = picBilling == null ? 0 : await _picQry.ActivateAsync(picBilling, ct);
+            int resIsActivatePicTech = picTech == null ? 0 : await _picQry.ActivateAsync(picTech, ct);
 
             /* 8. generate new otp for reset password */
-            var OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg["OtpToken :Expiry"]);
+            var OtpAndExpiry = Utilities.DoGenerateHashedOtp(_cfg.GetValue<int>("JwtToken:RefreshExpiry"));
             int resOtp = await _otpQry.AddAsync(login.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.ResetPwd, ct);
 
             if(IsActivationSuccessful(resMarkPaidBill, resProvision, resCstring, resUpdatePreRegist, 

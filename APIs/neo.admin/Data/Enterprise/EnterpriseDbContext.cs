@@ -22,6 +22,11 @@ namespace neo.admin.Data.Enterprise
 
         public DbSet<PIC> PICs => Set<PIC>();
 
+        public async Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default)
+        {
+            await Database.ExecuteSqlRawAsync(sql, ct);
+        }
+
         protected override void OnModelCreating(ModelBuilder b)
         {
             base.OnModelCreating(b);

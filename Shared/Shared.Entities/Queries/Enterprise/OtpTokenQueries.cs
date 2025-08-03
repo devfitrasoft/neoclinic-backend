@@ -43,6 +43,8 @@ namespace Shared.Entities.Queries.Enterprise
 
             if(row == null) return 0;
 
+            if(row.IsUsed) return 2;
+
             row.IsUsed = true;
             row.UpdatedAt = DateTime.UtcNow;
             return await _edb.SaveChangesAsync(ct);

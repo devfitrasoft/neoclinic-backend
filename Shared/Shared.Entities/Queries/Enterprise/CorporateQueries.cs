@@ -9,10 +9,10 @@ namespace Shared.Entities.Queries.Enterprise
         private readonly IEnterpriseDbContext _db;
         public CorporateQueries(IEnterpriseDbContext db) => _db = db;
 
-        public Task<List<CorporateLookupItem>> SearchAsync(string term, CancellationToken ct) =>
+        public Task<List<CorporateLookupItemModel>> SearchNotDeletedAsync(string term, CancellationToken ct) =>
             _db.Corporates
                .Where(c => !c.IsDeleted && EF.Functions.ILike(c.Name, $"%{term}%"))
-               .Select(c => new CorporateLookupItem(c.Id, c.Name))
+               .Select(c => new CorporateLookupItemModel(c.Id, c.Name))
                .ToListAsync(ct);
 
         public async Task<Corporate?> GetByIdAsync(long id, CancellationToken ct) =>
@@ -38,9 +38,12 @@ namespace Shared.Entities.Queries.Enterprise
             return corp;
         }
 
-        public async Task<int> UpdateIsActiveAsync(Corporate corporate, bool isActive, CancellationToken ct)
+        public async Task<int> ActivateAsync(Corporate corporate, CancellationToken ct)
         {
-            corporate.IsActive = isActive;
+            if (corporate.IsActive && !corporate.IsDeleted) return 1;
+
+            corporate.IsActive = true;
+            corporate.IsDeleted = false;
             return await _db.SaveChangesAsync(ct);
         }
     }

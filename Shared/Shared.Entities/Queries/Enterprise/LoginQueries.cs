@@ -10,18 +10,28 @@ namespace Shared.Entities.Queries.Enterprise
 
         public LoginQueries(IEnterpriseDbContext edb) => _edb = edb;
 
-        public async Task<Login?> GetLoginByUsernameAsync(string username, CancellationToken ct)
-            => await _edb.Logins.FirstOrDefaultAsync(l => l.Username == username, ct);
-
-        public async Task<Login?> GetLoginFaskesCorpByUsernameAsync(string username, CancellationToken ct)
+        public async Task<Login?> GetWithFaskesCorpByUsernameAsync(string username, CancellationToken ct) // For account activation
             => await _edb.Logins.Include(l => l.Faskes)
                                     .ThenInclude(f => f.PICs)
                                 .Include(l => l.Corporate)
                                 .FirstOrDefaultAsync(l => l.Username == username, ct);
 
-        public async Task<Login> GenerateNewLoginIfNotExist(string username, RegisterFaskesRequest req, Faskes faskes, Corporate? corp, CancellationToken ct)
+        public async Task<Login?> GetActiveByUsernameAsync(string username, CancellationToken ct)
+            => await _edb.Logins.Include(l => l.Faskes)
+                                    .ThenInclude(f => f.PICs)
+                                .Include(l => l.Corporate)
+                                .FirstOrDefaultAsync(l => l.Username == username
+                                                       && l.IsActive
+                                                       && !l.IsDeleted, ct);
+
+        public async Task<Login?> GetById(long id, CancellationToken ct)
+            => await _edb.Logins.Include(l => l.Faskes)
+                                .FirstOrDefaultAsync(r => r.Id == id);
+
+        public async Task<Login> GenerateFaskesSUIfNotExist(string noFaskes, RegisterFaskesRequest req, Faskes faskes, Corporate? corp, CancellationToken ct)
         {
-            var login = await GetLoginByUsernameAsync(username, ct);
+            string username = $"{faskes.NoFaskes}.SU";
+            var login = await _edb.Logins.FirstOrDefaultAsync(l => l.Username == username, ct);
 
             if (login == null)
             {
@@ -52,13 +62,26 @@ namespace Shared.Entities.Queries.Enterprise
                                     ?? throw new InvalidOperationException("Login not found");          // re‑throw if truly unexpected
                 }
             }
+            else
+            {
+                // re-cycle existing login
+                login.IsDeleted = false;
+                login.IsActive = false;
+                login.UpdatedAt = DateTime.UtcNow;
+                login.CreatorId = 0;
+
+                await _edb.SaveChangesAsync(ct);
+            }
 
             return login;
         }
 
-        public async Task<int> UpdateIsActiveAsync(Login login, bool isActive, CancellationToken ct)
+        public async Task<int> ActivateAsync(Login login, CancellationToken ct)
         {
-            login.IsActive = isActive;
+            if (login.IsActive && !login.IsDeleted) return 1;
+
+            login.IsActive = true;
+            login.IsDeleted = false;
             return await _edb.SaveChangesAsync(ct);
         }
 

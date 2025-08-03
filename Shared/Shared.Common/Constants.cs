@@ -7,7 +7,5 @@
         public const string DB_FASKES_DEFAULT_HOST = "localhost";
         public const string DB_FASKES_DEFAULT_USERNAME = "postgres";
         public const string DB_FASKES_DEFAULT_PASSWORD = "postgree";
-
-        public const string OTP_EXPIRY_IN_MINUTE = "15";
     }
 }

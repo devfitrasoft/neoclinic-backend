@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace neo.preregist.Models
 {
-    public sealed class TokenVerifyResponse : CommonAPIBodyResponse
+    public sealed class TokenVerifyResponse : CommonAPIBodyResponseModel
     {
         [JsonPropertyName("data")]
         public IEnumerable<PreRegistData> Data { get; set; } = new List<PreRegistData>();

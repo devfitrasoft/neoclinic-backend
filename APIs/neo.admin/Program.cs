@@ -1,10 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
 using neo.admin.Data.FaskesObj.Factories;
 using neo.admin.Facades;
 using neo.admin.Migrations.Factories;
 using neo.admin.Models;
 using neo.admin.Services;
+using neo.admin.Services.Factories;
+using neo.admin.Services.Token;
+using neo.admin.StartupActions;
 using Shared.Common;
 using Shared.Communication.DependencyInjection;
 using Shared.EFCore;
@@ -14,13 +18,12 @@ using Shared.Logging;
 using Shared.Mailing;
 using Shared.Models;
 using System.ComponentModel.DataAnnotations;
-using static System.Net.WebRequestMethods;
 
 
 var b = WebApplication.CreateBuilder(args);
 
 /* Registration configs */
-b.Services.Configure<RegistrationSettings>(
+b.Services.Configure<RegistrationSettingsModel>(
     b.Configuration.GetSection("Registration"));
 
 /* using Shared.Logging library */
@@ -56,6 +59,11 @@ b.Services.AddScoped<DbProvisionerFactory>();
 b.Services.AddSharedRestClient();         // registers RestClient
 b.Services.AddMailing(b.Configuration);   // SMTP
 
+/*  Load token-related services */
+b.Services.AddScoped<IJwtProvider, JwtProvider>();
+b.Services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+b.Services.AddScoped<ITokenService, TokenService>();
+
 /*  Load services   */
 b.Services.AddScoped<ICaptchaValidatorService, CaptchaValidatorService>();
 b.Services.AddScoped<MailService>();
@@ -80,8 +88,13 @@ b.Services.AddCors(opts =>
     opts.AddDefaultPolicy(policy =>
         policy.WithOrigins(b.Configuration.GetValue<string>("App:RegisterWebUrl") ?? Constants.REGISTER_FRONT_END_URL)
               .AllowAnyHeader()
+              .AllowCredentials()
               .AllowAnyMethod());
 });
+
+b.Services.AddSingleton<IStartupFilter, TokenAction>();
+
+b.Services.AddControllers();
 
 var app = b.Build();
 
@@ -92,24 +105,24 @@ app.UseCors();   // uses the default policy above
 /* 1. GET faskes by nomor */
 app.MapGet("/faskes/search/{noFaskes}",
     async (string noFaskes, FaskesQueries q, CancellationToken ct) => {
-        var faskes = await q.GetAsync(noFaskes, ct);
+        var faskes = await q.GetNotDeletedAsync(noFaskes, ct);
 
         if (faskes == null)
-            return Results.Json(new FaskesInfoResponse()
+            return Results.Json(new FaskesInfoResponseModel()
             {
                 Success = false,
                 Message = "Couldn't find data faskes for the requested nomor faskes"
             }, statusCode: StatusCodes.Status204NoContent);
 
-        var data = new FaskesInfoResponseData(
+        var data = new FaskesInfoResponseDataModel(
             faskes.Id, faskes.Name, faskes.Email, faskes.Phone,
             faskes.Address, faskes.IsActive, faskes.CorporateId, faskes.Name
         );
 
-        return Results.Ok(new FaskesInfoResponse()
+        return Results.Ok(new FaskesInfoResponseModel()
         {
             Success = true,
-            Data = new List<FaskesInfoResponseData>() { data }
+            Data = new List<FaskesInfoResponseDataModel>() { data }
         });
 });
 
@@ -117,17 +130,17 @@ app.MapGet("/faskes/search/{noFaskes}",
 app.MapGet("/corporates",
     async (string q, CorporateQueries cqs, CancellationToken ct) =>
     {
-        var corporateList = await cqs.SearchAsync(q, ct);
+        var corporateList = await cqs.SearchNotDeletedAsync(q, ct);
 
         if (corporateList == null)
-            return Results.Json(new CorporateInfoResponse() 
+            return Results.Json(new CorporateInfoResponseModel() 
             { 
                 Success = false, 
                 Message = "No corporate data available"
             }, statusCode: StatusCodes.Status204NoContent);
 
 
-        return Results.Ok(new CorporateInfoResponse()
+        return Results.Ok(new CorporateInfoResponseModel()
         {
             Success = true,
             Data = corporateList
@@ -136,7 +149,7 @@ app.MapGet("/corporates",
 
 /* 3. POST register faskes */
 app.MapPost("/faskes/register",
-    async (RegisterFaskesRequest req,
+    async ([FromBody] RegisterFaskesRequest req,
            IRegistrationFacade facade,
            CancellationToken ct) =>
     {
@@ -144,19 +157,14 @@ app.MapPost("/faskes/register",
         var context = new ValidationContext(req);
 
         if (!Validator.TryValidateObject(req, context, validationResults, validateAllProperties: true))
-            return Results.Json(new RegisterFaskesResponse()
+            return Results.Json(new RegisterFaskesResponseModel()
             {
                 Success = false,
                 Message = StringParser.ValidationErrorMessageBuilder(validationResults)
             }, statusCode: StatusCodes.Status400BadRequest);
 
         var res = await facade.RegisterAsync(req, ct);
-        return Results.Json(new RegisterFaskesResponse()
-        {
-            Success = true,
-            Message = "New faskes Created",
-            Data = new List<RegisterFaskesResponseData>() { res },
-        }, statusCode: StatusCodes.Status201Created);
+        return Results.Json(res, statusCode: StatusCodes.Status201Created);
     });
 
 /* GET Back‑office activation */
@@ -169,13 +177,13 @@ app.MapGet("/faskes/activate/{username}",
 
         if (isActivated)
         {
-            return Results.Ok(new CommonAPIBodyResponse(){
+            return Results.Ok(new CommonAPIBodyResponseModel(){
                 Success = true
             });
         }
         else
         {
-            return Results.Json(new CommonAPIBodyResponse()
+            return Results.Json(new CommonAPIBodyResponseModel()
             {
                 Success = false,
                 Message = "One or some of the object couldn't be saved/updated to the database"
@@ -193,11 +201,25 @@ app.MapPost("reset-password",
         if (!otpIsValid.Success)
             return Results.BadRequest(otpIsValid); // Prompt user to ask for new OTP
 
-        await facade.MarkIsUsedAsync(req.Otp, ct);  // Expire the current OTP
+        int resOtpUsage = await facade.MarkIsUsedAsync(req.Otp, ct);  // Expire the current OTP
+
+        if(resOtpUsage == 0)
+            return Results.BadRequest(new CommonAPIBodyResponseModel()
+            {
+                Success = false,
+                Message = "Invalid OTP"
+            });
+
+        if (resOtpUsage == 2)
+            return Results.BadRequest(new CommonAPIBodyResponseModel()
+            {
+                Success = false,
+                Message = "OTP has been used"
+            });
 
         // Validate password match
         if (req.Password != req.RePassword)
-            return Results.BadRequest(new CommonAPIBodyResponse()
+            return Results.BadRequest(new CommonAPIBodyResponseModel()
             {
                 Success = false,
                 Message = "Passwords do not match." 
@@ -216,5 +238,7 @@ app.MapPost("reset-password",
             return Results.UnprocessableEntity(result);
         }
     });
+
+app.MapControllers();
 
 app.Run();

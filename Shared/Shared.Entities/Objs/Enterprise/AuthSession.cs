@@ -16,7 +16,13 @@ namespace Shared.Entities.Objs.Enterprise
         [Required, Column("refresh_token_hash"), MaxLength(255)]
         public string RefreshTokenHash { get; set; } = null!;
 
+        [Required, Column("device_id"), MaxLength(128)]
+        public string DeviceId { get; set; } = null!;
+
+        [Column("user_agent"), MaxLength(512)]
+        public string? UserAgent { get; set; }
+
         [Required, Column("issued_at")] public DateTime IssuedAt { get; set; }
-        [Required, Column("expired_at")] public DateTime ExpiredAt { get; set; }
+        [Required, Column("last_active_at")] public DateTime LastActiveAt { get; set; }
     }
 }

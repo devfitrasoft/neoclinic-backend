@@ -38,6 +38,8 @@ namespace Shared.Entities.Queries.Enterprise
                 return 0;
             }
 
+            if (row.IsRegistered) return 1;
+
             row.IsRegistered = true;
             row.UpdatedAt = DateTime.UtcNow;
 
