@@ -41,8 +41,8 @@ namespace Shared.Entities.Queries.Enterprise
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
                     Faskes = faskes,              // assuming faskesQry is tracked
                     CorporateId = corp?.Id,
-                    Email = req.Email,
-                    PhoneNumber = req.Phone,
+                    Email = req.EmailPj,
+                    PhoneNumber = req.PhonePj,
                     IsActive = false,
                     CreatedAt = DateTime.UtcNow,
                     CreatorId = 0

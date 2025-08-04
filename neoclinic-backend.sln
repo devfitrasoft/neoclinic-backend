@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Entities", "Shared\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Models", "Shared\Shared.Models\Shared.Models.csproj", "{3FD6F708-2D65-4F97-B171-AC384A1CCA57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "neo.billing", "APIs\neo.billing\neo.billing.csproj", "{5350FE61-AC30-477E-A5D7-A6129FFDDA1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "neo.scheduler", "APIs\neo.billing\neo.scheduler.csproj", "{5350FE61-AC30-477E-A5D7-A6129FFDDA1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

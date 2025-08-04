@@ -9,10 +9,10 @@ namespace neo.admin.Migrations.Factories
         private readonly EnterpriseDbContext _edbctx;
         private readonly FaskesDbContextFactory _faskesFactory;
 
-        public DbProvisionerFactory(FaskesDbContextFactory faskesFactory, EnterpriseDbContext edbctx)
+        public DbProvisionerFactory(IConfiguration cfg, EnterpriseDbContext edbctx)
         {
             _edbctx = edbctx;
-            _faskesFactory = faskesFactory;
+            _faskesFactory = new FaskesDbContextFactory(cfg);
         }
 
         /// <param name="loginId">Enterprise DB sys_login.Id of the SU account.</param>

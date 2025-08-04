@@ -9,7 +9,7 @@ namespace Shared.Entities.Queries.Enterprise
         private readonly IEnterpriseDbContext _db;
         public FaskesQueries(IEnterpriseDbContext db) => _db = db;
 
-        public Task<Faskes?> GetNotDeletedAsync(string noFaskes, CancellationToken ct) =>
+        public Task<Faskes?> GetByCodeNotDeletedAsync(string noFaskes, CancellationToken ct) =>
             _db.Faskeses.Include(f => f.PICs)
                         .FirstOrDefaultAsync(f => f.NoFaskes == noFaskes
                                                && !f.IsDeleted, ct);
