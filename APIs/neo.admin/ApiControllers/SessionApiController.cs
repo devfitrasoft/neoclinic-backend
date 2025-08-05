@@ -9,10 +9,10 @@ using Shared.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Security;
 
-namespace neo.admin.Controllers
+namespace neo.admin.ApiControllers
 {
     [ApiController, Route("api/v1/session")]
-    public class SessionController : ControllerBase
+    public class SessionApiController : ControllerBase
     {
         private readonly ILoginFacade _facade;
         private readonly ICookieService _cookieService;
@@ -21,7 +21,7 @@ namespace neo.admin.Controllers
         private const string X_CLIENT_TYPE_WEB = "web";
         private const string X_CLIENT_TYPE_MOBILE = "mobile";
 
-        public SessionController(ILogger<LoginFacade> facadeLogger, ITokenService tokenService, EnterpriseDbContext edb)
+        public SessionApiController(ILogger<LoginFacade> facadeLogger, ITokenService tokenService, EnterpriseDbContext edb)
         {
             _facade = new LoginFacade(facadeLogger, tokenService, edb);
             _cookieService = new CookieService();

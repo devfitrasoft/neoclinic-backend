@@ -1,4 +1,5 @@
 ﻿using neo.preregist.Common;
+using neo.preregist.Data.Enterprise;
 using neo.preregist.Models;
 using neo.preregist.Services;
 using Shared.Common;
@@ -23,15 +24,15 @@ namespace neo.preregist.Facades
         private readonly PreRegistQueries _prQueries;
         private readonly ILogger<PreRegistFacades> _logger;
 
-        public PreRegistFacades(ILogger<PreRegistFacades> logger, IConfiguration cfg, IOtpTokenDbContext otpCtx, 
-            IPreRegistDbContext preRegCtx, MailService mail, ILoggerFactory loggerFactory)
+        public PreRegistFacades(ILoggerFactory loggerFactory, IConfiguration cfg, 
+            EnterpriseDbContext edb, MailService mail)
         {
             _cfg = cfg;
             _mail = mail;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<PreRegistFacades>();
 
-            _otpQueries = new OtpTokenQueries(otpCtx);
-            _prQueries = new PreRegistQueries(loggerFactory, preRegCtx);
+            _otpQueries = new OtpTokenQueries(edb);
+            _prQueries = new PreRegistQueries(loggerFactory, edb);
         }
 
         public async Task<PreRegistResponse> SaveAndNotify(PreRegistRequest req, CancellationToken ct)
@@ -63,7 +64,17 @@ namespace neo.preregist.Facades
                             resOTP = await _otpQueries.AddAsync(row.Id, OtpAndExpiry.Item1, OtpAndExpiry.Item2, OtpType.PreRegist, ct);
 
                             if (resOTP > 0)
-                                await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                                _ = Task.Run(async () =>
+                                {
+                                    try
+                                    {
+                                        await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError(ex, "SaveAndNotify: Failed to send invitation email");
+                                    }
+                                });
 
                             response = GenerateResponse(PreRegistSaveResponse.Updated, true, "Updated", row.IsRegistered);
                             return response;
@@ -75,8 +86,18 @@ namespace neo.preregist.Facades
                             resOTP = await _otpQueries.RenewOtpAsync(otpRow, OtpAndExpiry.Item1, OtpAndExpiry.Item2, ct);
                         }
 
-                        if(resOTP > 0)
-                            await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                        if (resOTP > 0)
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "SaveAndNotify: Failed to send invitation email");
+                                }
+                            });
 
                         response = GenerateResponse(PreRegistSaveResponse.Updated, true, "Updated", row.IsRegistered);
                     }
@@ -92,7 +113,17 @@ namespace neo.preregist.Facades
 
                 //  4. Send Mail/Whatsapp to the user
                 if(newPreRegist != null && resOTP > 0)
-                    await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);  //  later would add the whatsapp here
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "SaveAndNotify: Failed to send invitation email");
+                        }
+                    });
             }
             catch (Exception ex)
             {

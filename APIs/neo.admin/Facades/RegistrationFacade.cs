@@ -2,8 +2,6 @@
 using neo.admin.Migrations.Factories;
 using neo.admin.Models;
 using neo.admin.Services;
-using Org.BouncyCastle.Ocsp;
-using Serilog;
 using Shared.Common;
 using Shared.Entities.Objs.Enterprise;
 using Shared.Entities.Queries.Enterprise;
@@ -15,12 +13,14 @@ namespace neo.admin.Facades
     {
         Task<RegisterFaskesResponseModel> RegisterAsync(string otp, RegisterFaskesRequest req, CancellationToken ct);
         Task<bool> ActivateFaskesAsync(string loginUsername, CancellationToken ct = default);
+        Task<Faskes?> GetFaskesByCodeAsync(string noFaskes, CancellationToken ct);
+        Task<List<CorporateLookupItemModel>> SearchCorpoByNameAsync(string query, CancellationToken ct);
     }
 
     public sealed class RegistrationFacade : IRegistrationFacade
     {
+        private readonly ILogger _logger;
         private readonly IConfiguration _cfg;
-        private readonly ILogger<RegistrationFacade> _logger;
 
         private readonly MailService _mail;
 
@@ -38,27 +38,24 @@ namespace neo.admin.Facades
 
         private readonly ICaptchaValidatorService _captcha;
 
-        public RegistrationFacade(ILogger<RegistrationFacade> logger, IConfiguration cfg, EnterpriseDbContext edb, DbProvisionerFactory prov,
-            MailService mail, ICaptchaValidatorService captcha, OtpTokenQueries otpQry, PreRegistQueries preRegistQry,
-            LoginQueries loginQry, FaskesQueries faskesQry, CorporateQueries corpQry, PICQueries picQry, BillingSettingQueries billingSettingQry,
-            BillingQueries billingQry) 
+        public RegistrationFacade(ILoggerFactory loggerFactory, IConfiguration cfg, 
+            EnterpriseDbContext edb, MailService mail, ICaptchaValidatorService captcha) 
         {
             _cfg = cfg;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<RegistrationFacade>();
 
             _mail = mail;
+            _prov = new DbProvisionerFactory(cfg, edb);
 
-            _prov = prov;
-
-            _otpQry = otpQry;
-            _picQry = picQry;
-            _corpQry = corpQry;
-            _loginQry = loginQry;
-            _faskesQry = faskesQry;
-            _billingQry = billingQry;
-            _preRegistQry = preRegistQry;
-            _billingSettingQry = billingSettingQry;
-            _cstrQry = new ConnStringQueries(cfg, edb); // it's loaded by every faskes db generation
+            _picQry = new PICQueries(edb);
+            _loginQry = new LoginQueries(edb);
+            _otpQry = new OtpTokenQueries(edb);
+            _faskesQry = new FaskesQueries(edb);
+            _corpQry = new CorporateQueries(edb);
+            _billingQry = new BillingQueries(edb);
+            _cstrQry = new ConnStringQueries(cfg, edb);
+            _billingSettingQry = new BillingSettingQueries(edb);
+            _preRegistQry = new PreRegistQueries(loggerFactory, edb);
 
             _captcha = captcha;
         }
@@ -114,7 +111,7 @@ namespace neo.admin.Facades
 
             bool success = false;
             // 2. Lookup faskesQry by NoFaskes
-            var faskes = await _faskesQry.GetNotDeletedAsync(req.NoFaskes, ct);
+            var faskes = await _faskesQry.GetByCodeNotDeletedAsync(req.NoFaskes, ct);
 
             if (faskes == null)
             {
@@ -149,7 +146,17 @@ namespace neo.admin.Facades
             var registerBilling = await _billingQry.GenerateRegistrationBillingAsync(faskes.Id, billingSetting, ct);
 
             // 5. Send email to user regarding initial billing
-            await _mail.SendRegistrationFeeAsync(req.EmailPj, faskes.Name, billingSetting.RegistrationFee);
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _mail.SendRegistrationFeeAsync(req.EmailPj, faskes.Name, billingSetting.RegistrationFee, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "RegisterAsync: Failed to send registration billing email");
+                }
+            });
 
             // 6. Only return true when both were newly inserted (Id > 0)
             success = IsRegistrationSuccessful(resCorp, faskes.Id, addPjPICRes.Id, addBillPICRes.Id, 
@@ -202,7 +209,17 @@ namespace neo.admin.Facades
                 var registerBilling = await _billingQry.GenerateRegistrationBillingAsync(faskes.Id, billingSetting, ct);
 
                 /* 5. re-send email to user regarding initial billing */
-                await _mail.SendRegistrationFeeAsync(picPJ.Email, faskes.Name, billingSetting.RegistrationFee);
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _mail.SendRegistrationFeeAsync(picPJ.Email, faskes.Name, billingSetting.RegistrationFee, ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "RegisterAsync: Failed to send registration billing email");
+                    }
+                });
 
                 /* 6. return immediately */
                 return false;
@@ -237,7 +254,17 @@ namespace neo.admin.Facades
                 resIsActivePicPJ, resIsActivatePicBilling, resIsActivatePicTech, resOtp))
             {
                 /* 9. send SU invite mail */
-                await _mail.SendInviteAsync(picPJ.Email, login.Username, OtpAndExpiry);
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _mail.SendInitSuPassResetAsync(login.Email, login.Username, OtpAndExpiry, ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "RegisterAsync: Failed to send registration billing email");
+                    }                
+                });
                 return true;
             }
             else
@@ -245,6 +272,12 @@ namespace neo.admin.Facades
                 return false;
             }
         }
+
+        public async Task<Faskes?> GetFaskesByCodeAsync(string noFaskes, CancellationToken ct)
+            => await _faskesQry.GetByCodeNotDeletedAsync(noFaskes,ct);
+
+        public async Task<List<CorporateLookupItemModel>> SearchCorpoByNameAsync(string query, CancellationToken ct)
+            => await _corpQry.SearchByNameNotDeletedAsync(query, ct);
 
         private bool IsRegistrationSuccessful(bool resCorp, long faskesId, long addPjPICResId, long addBillPICResId, long addTechPICResId,
             long loginId, long billingSettingId, long registerBillingId)

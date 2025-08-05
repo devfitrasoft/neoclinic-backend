@@ -17,11 +17,11 @@ namespace neo.admin.Services
             _regSettings = regSettings.Value;
         }
 
-        public Task SendInviteAsync(string toEmail, string loginUsername, Tuple<string,DateTime> otp)
+        public Task SendInitSuPassResetAsync(string toEmail, string loginUsername, Tuple<string,DateTime> otp, CancellationToken ct)
         {
 
             var encodedToken = Uri.EscapeDataString(otp.Item1);
-            var link = $"{_cfg["App:RegisterWebUrl"]}/register?token={encodedToken}";
+            var link = $"{_cfg["App:RegisterWebUrl"]}/password-reset?token={encodedToken}";
             int otpExpiry = _cfg.GetValue<int>("OtpToken:Expiry");
 
             var safeUsername = loginUsername.Replace(".", "&#8203;.");
@@ -33,10 +33,10 @@ namespace neo.admin.Services
 
             return _email.SendAsync(toEmail,
                 "Aktivasi akun NeoClinic",
-                html);
+                html, ct);
         }
 
-        public Task SendRegistrationFeeAsync(string toEmail, string faskesName, decimal registrationFee)
+        public Task SendRegistrationFeeAsync(string toEmail, string faskesName, decimal registrationFee, CancellationToken ct)
         {
             string rekening = _regSettings.BankAccountNumber;
             string phone = _regSettings.ConfirmPaymentPhoneNumber;
@@ -49,6 +49,22 @@ namespace neo.admin.Services
 
             return _email.SendAsync(toEmail,
                 $"Konfirmasi Pembayaran akun NeoClinic - {faskesName}",
+                html);
+        }
+
+        public Task SendPassResetAsync(string toEmail, Tuple<string, DateTime> otp, CancellationToken ct)
+        {
+            var encodedToken = Uri.EscapeDataString(otp.Item1);
+            var link = $"{_cfg["App:RegisterWebUrl"]}/password-reset?token={encodedToken}";
+            int otpExpiry = _cfg.GetValue<int>("OtpToken:Expiry");
+
+            var html = TemplateRenderer.Render("""
+            <p>Klik tautan di bawah untuk menyetel ulang kata sandi user anda :</p>
+            <p><a href="{{ link }}">Setel ulang Kata Sandi</a></p>
+            """, new { link });
+
+            return _email.SendAsync(toEmail,
+                "Tautan Reset Password akun NeoClinic",
                 html);
         }
     }
