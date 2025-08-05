@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using neo.admin.Data.Enterprise;
 using neo.admin.Facades;
-using neo.admin.Models;
 using neo.admin.Services;
 using Shared.Common;
 using Shared.Models;
@@ -19,16 +18,7 @@ namespace neo.admin.ApiControllers
         [HttpGet, Route("send-request")]
         public async Task<IActionResult> SendRequestAsync([FromQuery] string username, CancellationToken ct)
         {
-            try
-            {
-                // Do not pass request-bound CancellationToken!
-                await _resetFacade.GenerateAndSendRequestOtpAsync(username, ct);
-            }
-            catch (Exception ex)
-            {
-                // Optional: log globally if needed
-                Console.WriteLine("Unhandled error in background OTP sender: " + ex.Message);
-            }
+            await _resetFacade.GenerateAndSendRequestOtpAsync(username, ct);
 
             return Ok(new CommonAPIBodyResponseModel() { Success = true });
         }
