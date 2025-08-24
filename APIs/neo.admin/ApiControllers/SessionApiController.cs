@@ -29,7 +29,7 @@ namespace neo.admin.ApiControllers
         }
 
         [HttpPost, Route("login")]
-        public async Task<IActionResult> LoginAsync([FromBody] LoginRequestModelBase req, CancellationToken ct)
+        public async Task<IActionResult> LoginAsync(ILoginRequestModel req, CancellationToken ct)
         {
             var clientType = Request.Headers["X-Client-Type"].FirstOrDefault()?.ToLower(); // "web" or "mobile"
             var deviceId = Request.Headers["X-Device-Id"].FirstOrDefault();
@@ -44,11 +44,16 @@ namespace neo.admin.ApiControllers
                         Message = "Unknown device/client"
                     });
 
+                // Validate using base model logic
+                var webReq = req as LoginRequestWebModel;
+                var mobileReq = req as LoginRequestMobileModel;
+                if ((clientType == X_CLIENT_TYPE_WEB && webReq == null) || (clientType == X_CLIENT_TYPE_MOBILE && mobileReq == null))
+                    return BadRequest(new { Message = "Invalid request type" });
 
                 var validationResults = new List<ValidationResult>();
-                var context = new ValidationContext(req);
+                var validationContext = new ValidationContext(req);
 
-                if (!Validator.TryValidateObject(req, context, validationResults, validateAllProperties: true))
+                if (!Validator.TryValidateObject(req, validationContext, validationResults, validateAllProperties: true))
                     return BadRequest(new LoginResponseModel()
                     {
                         Success = false,
@@ -69,11 +74,17 @@ namespace neo.admin.ApiControllers
                         ? StatusCodes.Status401Unauthorized
                         : StatusCodes.Status500InternalServerError, result);
 
+                var context = new LoginSessionContext
+                {
+                    TanggalJaga = webReq?.TanggalJaga,
+                    Shift = webReq?.Shift
+                };
+
                 if (clientType == X_CLIENT_TYPE_WEB)
-                    _cookieService.SetAuth(Response, result.Data.Tokens, result.Data.Login);
+                    _cookieService.SetAuth(Response, result.Data.Tokens, result.Data.Login, context);
 
                 if (clientType == X_CLIENT_TYPE_MOBILE)
-                    _headerService.SetAuth(Response, result.Data.Tokens, result.Data.Login);
+                    _headerService.SetAuth(Response, result.Data.Tokens, result.Data.Login, context);
             }
             catch (Exception)
             {
@@ -110,6 +121,22 @@ namespace neo.admin.ApiControllers
                 ? Request.Cookies["refresh_token"]
                 : Request.Headers["X-Refresh-Token"].FirstOrDefault();
 
+            var tanggalJagaCookie = clientType == X_CLIENT_TYPE_WEB 
+                ? Request.Cookies["tanggal_jaga"] 
+                : Request.Headers["X-Tanggal-Jaga"].FirstOrDefault();
+
+            var shiftCookie = clientType == X_CLIENT_TYPE_WEB 
+                ? Request.Cookies["shift"]
+                : Request.Headers["X-Shift"].FirstOrDefault();
+
+            var context = new LoginSessionContext();
+
+            if (DateTime.TryParse(tanggalJagaCookie, out var parsedTanggalJaga))
+                context.TanggalJaga = parsedTanggalJaga;
+
+            if (int.TryParse(shiftCookie, out var parsedShift))
+                context.Shift = parsedShift;
+
             if (string.IsNullOrEmpty(refreshToken))
                 return Unauthorized(new LoginResponseModel()
                 {
@@ -122,10 +149,10 @@ namespace neo.admin.ApiControllers
                 var result = await _facade.RotateRefreshTokenAsync(refreshToken, deviceId, userAgent, ct);
 
                 if (clientType == X_CLIENT_TYPE_WEB)
-                    _cookieService.SetAuth(Response, result.Tokens, result.Login);
+                    _cookieService.SetAuth(Response, result.Tokens, result.Login, context);
 
                 if (clientType == X_CLIENT_TYPE_MOBILE)
-                    _headerService.SetAuth(Response, result.Tokens, result.Login);
+                    _headerService.SetAuth(Response, result.Tokens, result.Login, context);
 
                 return Ok(new { success = true, message = "Token refreshed" });
             }
