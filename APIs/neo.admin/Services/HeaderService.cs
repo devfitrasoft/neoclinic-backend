@@ -5,22 +5,22 @@ namespace neo.admin.Services
 {
     public interface IHeaderService
     {
-        void SetAuth(HttpResponse response, TokenResultModel tokens, Login login);
+        void SetAuth(HttpResponse response, TokenResultModel tokens, Login login, LoginSessionContext? context = null);
         void ClearAuth(HttpResponse response);
     }
     public class HeaderService : IHeaderService
     {
-        public void SetAuth(HttpResponse response, TokenResultModel tokens, Login login)
+        public void SetAuth(HttpResponse response, TokenResultModel tokens, Login login, LoginSessionContext? context = null)
         {
             response.Headers["X-Access-Token"] = tokens.AccessToken;
             response.Headers["X-Refresh-Token"] = tokens.RefreshToken;
             response.Headers["X-Faskes-Name"] = login.Faskes?.Name ?? string.Empty;
 
-            var accessExpiresInSec = (int)(tokens.AccessTokenExpiry - DateTime.UtcNow).TotalSeconds;
-            var refreshExpiresInSec = (int)(tokens.RefreshTokenExpiry - DateTime.UtcNow).TotalSeconds;
+            if (context?.TanggalJaga != null)
+                response.Headers["X-Tanggal-Jaga"] = context.TanggalJaga.Value.ToString();
 
-            response.Headers["X-Token-Expires-In"] = accessExpiresInSec.ToString();
-            response.Headers["X-Refresh-Expires-In"] = refreshExpiresInSec.ToString();
+            if (context?.Shift != null)
+                response.Headers["X-Shift"] = context.Shift.ToString();
         }
 
         public void ClearAuth(HttpResponse response)
@@ -28,8 +28,6 @@ namespace neo.admin.Services
             response.Headers.Remove("X-Access-Token");
             response.Headers.Remove("X-Refresh-Token");
             response.Headers.Remove("X-Faskes-Name");
-            response.Headers.Remove("X-Token-Expires-In");
-            response.Headers.Remove("X-Refresh-Expires-In");
         }
     }
 }

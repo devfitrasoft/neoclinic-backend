@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
+using neo.admin.ModelBindings.Providers;
 using neo.admin.Models;
 using neo.admin.Services;
 using neo.admin.Services.Factories;
@@ -69,7 +70,10 @@ b.Services.AddCors(opts =>
 
 b.Services.AddSingleton<IStartupFilter, TokenAction>();
 
-b.Services.AddControllers();
+b.Services.AddControllers(options =>
+{
+    options.ModelBinderProviders.Insert(0, new LoginRequestModelBinderProvider());
+});
 
 var app = b.Build();
 

@@ -9,7 +9,7 @@ namespace neo.admin.Facades
 {
     public interface ILoginFacade
     {
-        Task<LoginResponseModel> CreateSessionAsync(LoginRequestModelBase req, string deviceId, string userAgent, CancellationToken ct);
+        Task<LoginResponseModel> CreateSessionAsync(ILoginRequestModel req, string deviceId, string userAgent, CancellationToken ct);
         Task<AuthSession?> GetSessionByRefreshTokenAsync(string hashedRefreshToken, string deviceId, string userAgent, CancellationToken ct);
         Task<SessionDataModel> RotateRefreshTokenAsync(string hashedRefreshToken, string deviceId, string userAgent, CancellationToken ct);
         Task<int> LogoutAsync(long loginId, string deviceId, string userAgent, CancellationToken ct);
@@ -34,14 +34,24 @@ namespace neo.admin.Facades
             _sessionQry = new AuthSessionQueries(edb);
         }
 
-        public async Task<LoginResponseModel> CreateSessionAsync(LoginRequestModelBase req, string deviceId, string userAgent, CancellationToken ct)
+        public async Task<LoginResponseModel> CreateSessionAsync(ILoginRequestModel req, string deviceId, string userAgent, CancellationToken ct)
         {
             var result = new LoginResponseModel();
             try
             {
-                var login = await _loginQry.GetActiveByUsernameAsync(req.Username, ct);
+                if (req is not LoginRequestModelBase baseReq)
+                {
+                    return new LoginResponseModel
+                    {
+                        Success = false,
+                        Message = "Invalid request model"
+                    };
+                }
 
-                if (login == null || !BCrypt.Net.BCrypt.Verify(req.Password, login.PasswordHash))
+
+                var login = await _loginQry.GetActiveByUsernameAsync(baseReq.Username, ct);
+
+                if (login == null || !BCrypt.Net.BCrypt.Verify(baseReq.Password, login.PasswordHash))
                     return new LoginResponseModel { Success = false, Message = "Invalid password" };
 
                 var tokens = await _tokenService.GenerateTokensAsync(login);

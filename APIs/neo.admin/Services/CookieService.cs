@@ -5,12 +5,12 @@ namespace neo.admin.Services
 {
     public interface ICookieService
     {
-        void SetAuth(HttpResponse response, TokenResultModel tokens, Login login);
+        void SetAuth(HttpResponse response, TokenResultModel tokens, Login login, LoginSessionContext? context = null);
         void ClearAuth(HttpResponse response);
     }
     public class CookieService : ICookieService
     {
-        public void SetAuth(HttpResponse response, TokenResultModel tokens, Login login)
+        public void SetAuth(HttpResponse response, TokenResultModel tokens, Login login, LoginSessionContext? context = null)
         {
             response.Cookies.Append("refresh_token", tokens.RefreshToken, new CookieOptions
             {
@@ -32,6 +32,26 @@ namespace neo.admin.Services
                 Secure = true,
                 SameSite = SameSiteMode.None
             });
+
+            if (context?.TanggalJaga != null)
+            {
+                response.Cookies.Append("tanggal_jaga", context.TanggalJaga.Value.ToString(), new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
+            }
+
+            if (context?.Shift != null)
+            {
+                response.Cookies.Append("shift", context.Shift.ToString(), new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
+            }
         }
 
         public void ClearAuth(HttpResponse response)
@@ -39,6 +59,8 @@ namespace neo.admin.Services
             response.Cookies.Delete("refresh_token");
             response.Cookies.Delete("access_token");
             response.Cookies.Delete("faskes_name");
+            response.Cookies.Delete("tanggal_jaga");
+            response.Cookies.Delete("shift");
         }
     }
 }
