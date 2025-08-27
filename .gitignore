@@ -7,6 +7,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -31,8 +38,14 @@ artifacts/
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
+# Visual Studio cache
+.vs/
+
 # NuGet Packages
 *.nupkg
+**/packages/*
+!**/packages/build/
+
 # NuGet Symbol Packages
 *.snupkg
 
@@ -52,3 +65,27 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Publish profiles
+*.pubxml
+*.publishproj
+*.publishsettings
+*.pfx
+
+# Node.js dependencies
+node_modules/
+
+# Databases
+*.mdf
+*.ldf
+*.dbmdl
+
+# Logs
+*.log
+
+# Others
+*.tmp
+*.bak
+*.swp
+~$*
+*~

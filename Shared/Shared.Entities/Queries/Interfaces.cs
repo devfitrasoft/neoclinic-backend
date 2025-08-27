@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Shared.Entities.Objs.Enterprise;
 using Shared.Entities.Objs.FaskesObj;
 
@@ -13,6 +14,7 @@ namespace Shared.Entities.Queries
         DbSet<ConnString> ConnStrings { get; }
         DbSet<AuthSession> AuthSessions { get; }
 
+        DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
         Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default);
     }
@@ -20,6 +22,8 @@ namespace Shared.Entities.Queries
     public interface IPreRegistDbContext
     {
         DbSet<PreRegist> PreRegists { get; }
+
+        DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
     }
 
@@ -27,7 +31,10 @@ namespace Shared.Entities.Queries
     {
         DbSet<OtpToken> OtpTokens { get; }
         DbSet<PreRegist> PreRegists { get; }
+
+        DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
+        Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default);
     }
 
     public interface IFaskesDbContext
@@ -40,14 +47,18 @@ namespace Shared.Entities.Queries
         DbSet<Group> Groups { get; }
         DbSet<Menu> Menus { get; }
 
+        DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
+        Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default);
     }
 
     public interface IPICDbContext
     {
         DbSet<PIC> PICs { get; }
 
+        DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
+        Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default);
     }
 
     public interface IBillingDbContext
@@ -55,6 +66,8 @@ namespace Shared.Entities.Queries
         DbSet<Billing> Billings { get; }
         DbSet<BillingSetting> BillingSettings { get; }
 
+        DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
+        Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default);
     }
 }

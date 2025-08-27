@@ -17,6 +17,11 @@ public class FaskesDbContext : DbContext, IFaskesDbContext
     public DbSet<Group> Groups => Set<Group>();
     public DbSet<Menu> Menus => Set<Menu>();
 
+    public async Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default)
+    {
+        await Database.ExecuteSqlRawAsync(sql, ct);
+    }
+
     protected override void OnModelCreating(ModelBuilder b)
     {
         base.OnModelCreating(b);
