@@ -11,6 +11,11 @@ namespace neo.preregist.Data.Enterprise
         public DbSet<PreRegist> PreRegists => Set<PreRegist>();
         public DbSet<OtpToken> OtpTokens => Set<OtpToken>();
 
+        public async Task ExecuteRawSqlAsync(string sql, CancellationToken ct = default)
+        {
+            await Database.ExecuteSqlRawAsync(sql, ct);
+        }
+
         protected override void OnModelCreating(ModelBuilder b)
         {
             base.OnModelCreating(b);

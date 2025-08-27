@@ -92,5 +92,42 @@ namespace Shared.Entities.Queries.Enterprise
 
             return token.TargetId;
         }
+
+        public async Task<int> PurgeUsedExpiryOtpAsync(CancellationToken ct)
+        {
+            int result = 0, resultReset = 1;
+            var rows = await _edb.OtpTokens
+                .Where(row => row.ExpiredAt > DateTime.UtcNow
+                           || row.IsUsed
+                ).ToListAsync();
+
+            if (rows.Count == 0)
+            {
+                result = 1;
+                resultReset = await ResetAIAsync(ct);
+                return result > 0 && resultReset > 0 ? 1 : 0;
+            }
+
+            _edb.OtpTokens.RemoveRange(rows);
+            result = await _edb.SaveChangesAsync(ct);
+
+            if(result != 0)
+            {
+                resultReset = await ResetAIAsync(ct);
+                return result > 0 && resultReset > 0 ? 1 : 0;
+            }
+
+            return result;
+        }
+
+        public async Task<int> ResetAIAsync(CancellationToken ct)
+        {
+            var tableName = "sys_otp";
+            var columnName = "Id";
+
+            var sequenceName = $"{tableName.ToLower()}_{columnName.ToLower()}_seq";
+            var sql = $"ALTER SEQUENCE \"{sequenceName}\" RESTART WITH 1;";
+            return await _edb.Database.ExecuteSqlRawAsync(sql, ct);
+        }
     }
 }

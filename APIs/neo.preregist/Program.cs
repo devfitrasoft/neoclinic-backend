@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using EfAutoMigration;
 using neo.preregist.Data.Enterprise;
 using neo.preregist.Services;
 using Shared.Common;
-using Shared.EFCore;
 using Shared.Entities.Queries;
 using Shared.Logging;
 using Shared.Mailing;

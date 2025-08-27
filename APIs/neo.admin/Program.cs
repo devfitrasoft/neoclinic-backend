@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EfAutoMigration;
+using Microsoft.EntityFrameworkCore;
 using neo.admin.Data.Enterprise;
 using neo.admin.ModelBindings.Providers;
 using neo.admin.Models;
@@ -8,7 +9,6 @@ using neo.admin.Services.Token;
 using neo.admin.StartupActions;
 using Shared.Common;
 using Shared.Communication.DependencyInjection;
-using Shared.EFCore;
 using Shared.Entities.Queries;
 using Shared.Logging;
 using Shared.Mailing;

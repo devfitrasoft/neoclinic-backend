@@ -22,7 +22,7 @@ namespace neo.admin.ModelBindings
             ILoginRequestModel? model = clientType switch
             {
                 "web" => JsonSerializer.Deserialize<LoginRequestWebModel>(body, options),
-                "mobile" => JsonSerializer.Deserialize<LoginRequestModelBase>(body, options),
+                "mobile" => JsonSerializer.Deserialize<LoginRequestMobileModel>(body, options),
                 _ => null
             };
 
