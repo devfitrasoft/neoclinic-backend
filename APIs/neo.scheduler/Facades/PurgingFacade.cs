@@ -27,6 +27,13 @@ namespace neo.scheduler.Facades
         }
 
         private async Task<int> PurgeOldOtpAsync(CancellationToken ct)
-            => await _otpQueries.PurgeUsedExpiryOtpAsync(ct);
+        {
+            var oldOtps = await _otpQueries.GetListOfUsedAndExpired(ct);
+
+            if (oldOtps.Count() == 0)
+                return 1;
+
+            return await _otpQueries.PurgeUsedExpiryOtpAsync(ct);
+        }
     }
 }

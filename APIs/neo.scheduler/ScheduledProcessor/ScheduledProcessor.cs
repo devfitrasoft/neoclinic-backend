@@ -9,7 +9,7 @@ namespace neo.scheduler.ScheduledProcessor
         private DateTime _nextRun;
         protected virtual TimeSpan InitialDelay => TimeSpan.Zero;
         protected abstract string Schedule { get; }
-        public ScheduledProcessor(IServiceScopeFactory serviceScopeFactory, CancellationToken ct) : base(serviceScopeFactory)
+        public ScheduledProcessor(IServiceScopeFactory serviceScopeFactory) : base(serviceScopeFactory)
         {
             schedule = CrontabSchedule.Parse(Schedule);
             _nextRun = schedule.GetNextOccurrence(DateTime.Now);
