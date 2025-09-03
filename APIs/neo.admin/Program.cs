@@ -47,7 +47,7 @@ b.Services.AddEfAutoMigration<EnterpriseDbContext>("sys_billing_setting", "sys_c
 
 /*  Load base libraries */
 b.Services.AddSharedRestClient();         // registers RestClient
-b.Services.AddMailing(b.Configuration);   // SMTP
+b.Services.AddMailing(b.Configuration,"Smtp");   // SMTP
 
 /*  Load token-related services */
 b.Services.AddScoped<IJwtProvider, JwtProvider>();

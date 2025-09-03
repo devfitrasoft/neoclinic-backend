@@ -6,13 +6,14 @@ namespace Shared.Mailing;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// AddMailing(builder.Configuration) → registers SMTP sender + binds settings.
+    /// Optional: wire up IEmailSender via IConfiguration (section defaults to "Smtp").
     /// </summary>
     public static IServiceCollection AddMailing(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        string sectionName = "YourSectionName")
     {
-        services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
+        services.Configure<SmtpSettings>(configuration.GetSection(sectionName));
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         return services;
     }

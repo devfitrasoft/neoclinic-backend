@@ -15,7 +15,7 @@ namespace neo.preregist.Services
             _email = email;
         }
 
-        public async Task SendInvitationAsync(string toEmail, string otp)
+        public async Task SendInvitationAsync(string toEmail, string otp, CancellationToken ct)
         {
             var header = LocalConstants.MAIL_REGIST_TOKEN_HEADER;
 
@@ -30,9 +30,12 @@ namespace neo.preregist.Services
             <p>Link hanya berlaku untuk {{ otpExpiry }} menit.</p>
             """, new { link, otpExpiry });
 
-            await _email.SendAsync(toEmail,
+            await _email.SendAsync(
+                Constants.MAIL_DEFAULT_SENDER_NAME,
+                Constants.MAIL_NO_REPLY_ADDRESS,
+                toEmail,
                 header,
-                html);
+                html, ct);
         }
     }
 }

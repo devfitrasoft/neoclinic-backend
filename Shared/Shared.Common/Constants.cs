@@ -7,5 +7,9 @@
         public const string DB_FASKES_DEFAULT_HOST = "localhost";
         public const string DB_FASKES_DEFAULT_USERNAME = "postgres";
         public const string DB_FASKES_DEFAULT_PASSWORD = "postgree";
+
+        // SMTP default
+        public const string MAIL_DEFAULT_SENDER_NAME = "NeoClinic App";
+        public const string MAIL_NO_REPLY_ADDRESS = "no-reply@neoclinic.com";
     }
 }

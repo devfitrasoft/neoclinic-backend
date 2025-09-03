@@ -68,7 +68,7 @@ namespace neo.preregist.Facades
                                 {
                                     try
                                     {
-                                        await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                                        await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, ct);
                                     }
                                     catch (Exception ex)
                                     {
@@ -91,7 +91,7 @@ namespace neo.preregist.Facades
                             {
                                 try
                                 {
-                                    await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                                    await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, ct);
                                 }
                                 catch (Exception ex)
                                 {
@@ -117,7 +117,7 @@ namespace neo.preregist.Facades
                     {
                         try
                         {
-                            await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1);
+                            await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, ct);
                         }
                         catch (Exception ex)
                         {
