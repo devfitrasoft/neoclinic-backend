@@ -26,4 +26,10 @@
         Failed = 2,
         Retrying = 3
     }
+
+    public enum MailType
+    {
+        PreRegistInvite = 1,
+        
+    }
 }

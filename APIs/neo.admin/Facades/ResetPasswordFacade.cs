@@ -1,7 +1,6 @@
 ﻿using neo.admin.Data.Enterprise;
 using neo.admin.Services;
 using Shared.Common;
-using Shared.Entities.Objs.Enterprise;
 using Shared.Entities.Queries.Enterprise;
 using Shared.Models;
 

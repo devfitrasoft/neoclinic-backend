@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using neo.admin.Models;
+using NeoMailing;
 using Shared.Common;
-using Shared.Mailing;
 
 namespace neo.admin.Services
 {
@@ -32,10 +32,10 @@ namespace neo.admin.Services
             <p><a href="{{ link }}">Setel Kata Sandi</a></p>
             """, new { loginUsername = safeUsername, link });
 
-            return _email.SendAsync(
+            return _email.SendHtmlAsync(
                 Constants.MAIL_DEFAULT_SENDER_NAME,
                 Constants.MAIL_NO_REPLY_ADDRESS,
-                toEmail,
+                new[] { toEmail },
                 "Aktivasi akun NeoClinic",
                 html, ct);
         }
@@ -51,10 +51,10 @@ namespace neo.admin.Services
             <p>dan konfirmasikan melalui WhatsApp di nomor {{ phone }}.</p>
             """, new { registrationFee, rekening, phone });
 
-            return _email.SendAsync(
+            return _email.SendHtmlAsync(
                 Constants.MAIL_DEFAULT_SENDER_NAME,
                 Constants.MAIL_NO_REPLY_ADDRESS,
-                toEmail,
+                new[] { toEmail },
                 $"Konfirmasi Pembayaran akun NeoClinic - {faskesName}",
                 html, ct);
         }
@@ -70,10 +70,10 @@ namespace neo.admin.Services
             <p><a href="{{ link }}">Setel ulang Kata Sandi</a></p>
             """, new { link });
 
-            return _email.SendAsync(
+            return _email.SendHtmlAsync(
                 Constants.MAIL_DEFAULT_SENDER_NAME,
                 Constants.MAIL_NO_REPLY_ADDRESS,
-                toEmail,
+                new[] { toEmail },
                 "Tautan Reset Password akun NeoClinic",
                 html, ct);
         }

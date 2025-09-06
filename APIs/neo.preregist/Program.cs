@@ -5,7 +5,7 @@ using neo.preregist.Services;
 using Shared.Common;
 using Shared.Entities.Queries;
 using Shared.Logging;
-using Shared.Mailing;
+using NeoMailing;
 
 var b = WebApplication.CreateBuilder(args);
 

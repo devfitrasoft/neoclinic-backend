@@ -1,6 +1,6 @@
 ﻿using neo.preregist.Common;
+using NeoMailing;
 using Shared.Common;
-using Shared.Mailing;
 
 namespace neo.preregist.Services
 {
@@ -30,10 +30,10 @@ namespace neo.preregist.Services
             <p>Link hanya berlaku untuk {{ otpExpiry }} menit.</p>
             """, new { link, otpExpiry });
 
-            await _email.SendAsync(
+            await _email.SendHtmlAsync(
                 Constants.MAIL_DEFAULT_SENDER_NAME,
                 Constants.MAIL_NO_REPLY_ADDRESS,
-                toEmail,
+                new[] { toEmail },
                 header,
                 html, ct);
         }

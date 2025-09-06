@@ -7,11 +7,11 @@ using neo.admin.Services;
 using neo.admin.Services.Factories;
 using neo.admin.Services.Token;
 using neo.admin.StartupActions;
+using NeoMailing;
 using Shared.Common;
 using Shared.Communication.DependencyInjection;
 using Shared.Entities.Queries;
 using Shared.Logging;
-using Shared.Mailing;
 
 
 var b = WebApplication.CreateBuilder(args);

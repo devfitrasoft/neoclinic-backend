@@ -3,7 +3,6 @@ using neo.preregist.Data.Enterprise;
 using neo.preregist.Models;
 using neo.preregist.Services;
 using Shared.Common;
-using Shared.Entities.Queries;
 using Shared.Entities.Queries.Enterprise;
 using Shared.Models;
 
