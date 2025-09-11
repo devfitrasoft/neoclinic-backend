@@ -67,7 +67,7 @@ namespace neo.preregist.Facades
                                 {
                                     try
                                     {
-                                        await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, ct);
+                                        await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, CancellationToken.None); // CancellationToken.None : avoid early cancellation
                                     }
                                     catch (Exception ex)
                                     {
@@ -90,7 +90,7 @@ namespace neo.preregist.Facades
                             {
                                 try
                                 {
-                                    await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, ct);
+                                    await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, CancellationToken.None); // CancellationToken.None : avoid early cancellation
                                 }
                                 catch (Exception ex)
                                 {
@@ -116,7 +116,7 @@ namespace neo.preregist.Facades
                     {
                         try
                         {
-                            await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, ct);
+                            await _mail.SendInvitationAsync(req.Email, OtpAndExpiry.Item1, CancellationToken.None); // CancellationToken.None : avoid early cancellation
                         }
                         catch (Exception ex)
                         {
@@ -139,19 +139,21 @@ namespace neo.preregist.Facades
 
         public async Task<PreRegistData?> GetRowByTokenAsync(string token, CancellationToken ct)
         {
-            var preRegistAndExpiry = await _otpQueries.GetPreRegistAndExpiryByTokenAsync(token, ct);
+            var preRegistAndExpiry = await _otpQueries.GetPreRegistAndDetailAsync(token, ct);
 
             if (preRegistAndExpiry == null)
                 return null;
 
             var preRegist = preRegistAndExpiry.Item1;
+            var otpDetail = preRegistAndExpiry.Item2;
 
             return new PreRegistData(
                 preRegist.Name,
                 preRegist.Email,
                 preRegist.Phone,
-                preRegistAndExpiry.Item2,
-                preRegist.IsRegistered
+                otpDetail.ExpiredAt,
+                preRegist.IsRegistered,
+                otpDetail.IsUsed
             );
         }
 

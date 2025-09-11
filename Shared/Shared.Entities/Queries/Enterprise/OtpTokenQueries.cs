@@ -21,11 +21,11 @@ namespace Shared.Entities.Queries.Enterprise
 
         public async Task<IEnumerable<OtpToken>> GetListOfUsedAndExpired(CancellationToken ct)
             => await _edb.OtpTokens
-                .Where(row => row.ExpiredAt > DateTime.UtcNow
+                .Where(row => row.ExpiredAt < DateTime.UtcNow
                            || row.IsUsed
                 ).ToListAsync(ct);
 
-        public async Task<Tuple<PreRegist, DateTime>?> GetPreRegistAndExpiryByTokenAsync(string otp, CancellationToken ct)
+        public async Task<Tuple<PreRegist, OtpToken>?> GetPreRegistAndDetailAsync(string otp, CancellationToken ct)
         {
             var row = await _edb.OtpTokens
                                .FirstOrDefaultAsync(r => r.Code == otp
@@ -38,7 +38,7 @@ namespace Shared.Entities.Queries.Enterprise
 
             if (preRegist == null) return null;
 
-            return Tuple.Create((PreRegist)preRegist, (DateTime)row.ExpiredAt);
+            return Tuple.Create(preRegist, row);
         }
 
         public async Task<int> MarkIsUsedAsync(string otp, OtpType tokenType, CancellationToken ct)
