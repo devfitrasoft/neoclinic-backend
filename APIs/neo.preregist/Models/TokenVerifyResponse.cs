@@ -9,11 +9,12 @@ namespace neo.preregist.Models
         public IEnumerable<PreRegistData> Data { get; set; } = new List<PreRegistData>();
     }
 
-    public sealed record PreRegistData(
+    public sealed record PreRegistData( //add flag isUsed from sys_otp
         string name,
         string email,
         string phone,
         DateTime? otpExpiresAt,
-        bool isRegistered
+        bool isRegistered,
+        bool isUsed
     );
 }

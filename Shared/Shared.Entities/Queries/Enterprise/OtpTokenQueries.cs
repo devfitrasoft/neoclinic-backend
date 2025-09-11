@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Shared.Common;
 using Shared.Entities.Objs.Enterprise;
 
@@ -18,7 +19,13 @@ namespace Shared.Entities.Queries.Enterprise
                         )
                         .ToListAsync(ct);
 
-        public async Task<Tuple<PreRegist, DateTime>?> GetPreRegistAndExpiryByTokenAsync(string otp, CancellationToken ct)
+        public async Task<IEnumerable<OtpToken>> GetListOfUsedAndExpired(CancellationToken ct)
+            => await _edb.OtpTokens
+                .Where(row => row.ExpiredAt < DateTime.UtcNow
+                           || row.IsUsed
+                ).ToListAsync(ct);
+
+        public async Task<Tuple<PreRegist, OtpToken>?> GetPreRegistAndDetailAsync(string otp, CancellationToken ct)
         {
             var row = await _edb.OtpTokens
                                .FirstOrDefaultAsync(r => r.Code == otp
@@ -31,7 +38,7 @@ namespace Shared.Entities.Queries.Enterprise
 
             if (preRegist == null) return null;
 
-            return Tuple.Create((PreRegist)preRegist, (DateTime)row.ExpiredAt);
+            return Tuple.Create(preRegist, row);
         }
 
         public async Task<int> MarkIsUsedAsync(string otp, OtpType tokenType, CancellationToken ct)
@@ -96,12 +103,9 @@ namespace Shared.Entities.Queries.Enterprise
         public async Task<int> PurgeUsedExpiryOtpAsync(CancellationToken ct)
         {
             int result = 0, resultReset = 1;
-            var rows = await _edb.OtpTokens
-                .Where(row => row.ExpiredAt > DateTime.UtcNow
-                           || row.IsUsed
-                ).ToListAsync();
+            var rows = await GetListOfUsedAndExpired(ct);
 
-            if (rows.Count == 0)
+            if (rows.Count() == 0)
             {
                 result = 1;
                 resultReset = await ResetAIAsync(ct);
@@ -122,10 +126,24 @@ namespace Shared.Entities.Queries.Enterprise
 
         public async Task<int> ResetAIAsync(CancellationToken ct)
         {
-            var tableName = "sys_otp";
-            var columnName = "Id";
+            var context = (DbContext)_edb; // cast to real DbContext
+            var entityType = context.Model.FindEntityType(typeof(OtpToken));
 
-            var sequenceName = $"{tableName.ToLower()}_{columnName.ToLower()}_seq";
+            // Get schema + table name
+            var schema = entityType?.GetSchema();
+            var tableName = entityType?.GetTableName();
+
+            // Build StoreObjectIdentifier for the table
+            var storeObject = StoreObjectIdentifier.Table(tableName, schema);
+
+            // Get PK column name
+            var columnName = entityType?
+                .FindPrimaryKey()?
+                .Properties
+                .First()
+                .GetColumnName(storeObject);
+
+            var sequenceName = $"{tableName?.ToLower()}_{columnName?.ToLower()}_seq";
             var sql = $"ALTER SEQUENCE \"{sequenceName}\" RESTART WITH 1;";
             return await _edb.Database.ExecuteSqlRawAsync(sql, ct);
         }

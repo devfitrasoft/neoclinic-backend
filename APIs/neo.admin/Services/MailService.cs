@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using neo.admin.Models;
-using Shared.Mailing;
+using NeoMailing;
+using Shared.Common;
 
 namespace neo.admin.Services
 {
@@ -31,7 +32,10 @@ namespace neo.admin.Services
             <p><a href="{{ link }}">Setel Kata Sandi</a></p>
             """, new { loginUsername = safeUsername, link });
 
-            return _email.SendAsync(toEmail,
+            return _email.SendHtmlAsync(
+                Constants.MAIL_DEFAULT_SENDER_NAME,
+                Constants.MAIL_NO_REPLY_ADDRESS,
+                new[] { toEmail },
                 "Aktivasi akun NeoClinic",
                 html, ct);
         }
@@ -47,9 +51,12 @@ namespace neo.admin.Services
             <p>dan konfirmasikan melalui WhatsApp di nomor {{ phone }}.</p>
             """, new { registrationFee, rekening, phone });
 
-            return _email.SendAsync(toEmail,
+            return _email.SendHtmlAsync(
+                Constants.MAIL_DEFAULT_SENDER_NAME,
+                Constants.MAIL_NO_REPLY_ADDRESS,
+                new[] { toEmail },
                 $"Konfirmasi Pembayaran akun NeoClinic - {faskesName}",
-                html);
+                html, ct);
         }
 
         public Task SendPassResetAsync(string toEmail, Tuple<string, DateTime> otp, CancellationToken ct)
@@ -63,9 +70,12 @@ namespace neo.admin.Services
             <p><a href="{{ link }}">Setel ulang Kata Sandi</a></p>
             """, new { link });
 
-            return _email.SendAsync(toEmail,
+            return _email.SendHtmlAsync(
+                Constants.MAIL_DEFAULT_SENDER_NAME,
+                Constants.MAIL_NO_REPLY_ADDRESS,
+                new[] { toEmail },
                 "Tautan Reset Password akun NeoClinic",
-                html);
+                html, ct);
         }
     }
 }

@@ -5,7 +5,7 @@ using neo.preregist.Services;
 using Shared.Common;
 using Shared.Entities.Queries;
 using Shared.Logging;
-using Shared.Mailing;
+using NeoMailing;
 
 var b = WebApplication.CreateBuilder(args);
 
@@ -31,7 +31,7 @@ b.Services.AddEfAutoMigration<EnterpriseDbContext>("pre_regist", "sys_otp");
 /* --------------------------------------------- */
 
 /*  Load base libraries */
-b.Services.AddMailing(b.Configuration);   // SMTP
+b.Services.AddMailing(b.Configuration,"Smtp");   // SMTP
 
 /*  Load services   */
 b.Services.AddScoped<MailService>();

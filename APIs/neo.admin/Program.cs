@@ -7,11 +7,11 @@ using neo.admin.Services;
 using neo.admin.Services.Factories;
 using neo.admin.Services.Token;
 using neo.admin.StartupActions;
+using NeoMailing;
 using Shared.Common;
 using Shared.Communication.DependencyInjection;
 using Shared.Entities.Queries;
 using Shared.Logging;
-using Shared.Mailing;
 
 
 var b = WebApplication.CreateBuilder(args);
@@ -47,7 +47,7 @@ b.Services.AddEfAutoMigration<EnterpriseDbContext>("sys_billing_setting", "sys_c
 
 /*  Load base libraries */
 b.Services.AddSharedRestClient();         // registers RestClient
-b.Services.AddMailing(b.Configuration);   // SMTP
+b.Services.AddMailing(b.Configuration,"Smtp");   // SMTP
 
 /*  Load token-related services */
 b.Services.AddScoped<IJwtProvider, JwtProvider>();
